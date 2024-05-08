@@ -38,5 +38,4 @@ check_pod_logs() {
 
 # Call the function with the argument "NAMESPACE"
 check_pod_logs "servicehub-mygreeterv3-server"
-check_pod_logs "servicehub-mygreeterv3-demoserver"
 check_pod_logs "servicehub-mygreeterv3-client"

@@ -16,7 +16,6 @@ RUN go mod tidy
 # The output will be in the current directory.
 # The path is the complete package path. No main name in the path.
 RUN go build dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client
-RUN go build dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/demoserver
 RUN go build dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/server
 
 
@@ -25,7 +24,6 @@ RUN go build dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/test
 # FROM busybox
 FROM mcr.microsoft.com/openjdk/jdk:17-ubuntu
 COPY --from=build /server/client /
-COPY --from=build /server/demoserver /
 COPY --from=build /server/server /
 
 CMD ["/server"]
