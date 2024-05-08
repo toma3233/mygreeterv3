@@ -1,0 +1,953 @@
+{
+    "$schema": "https://dataexplorer.azure.com/static/d/schema/44/dashboard.json",
+    "id": "3303e636-d213-4452-a5f9-b752f952f5b4",
+    "eTag": "359b71a0-7d30-41b1-8ed9-ffc3db3b66a3",
+    "schema_version": "44",
+    "title": "External mygreeterv3 Dashboard",
+    "autoRefresh": {
+        "enabled": true,
+        "defaultInterval": "30m",
+        "minInterval": "5m"
+    },
+    "baseQueries": [
+        {
+            "id": "99e21b1b-5aed-43e8-8071-f4a777fd2979",
+            "dataSource": {
+                "kind": "inline",
+                "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77"
+            },
+            "text": "ContainerLogV2\n| where LogMessage[\"source\"] == \"ApiAutoLog\"\n| where todatetime(LogMessage[\"time\"]) between (_startTime.._endTime)\n| where LogMessage[\"msg\"] == \"finished call\"",
+            "usedVariables": [
+                "_endTime",
+                "_startTime"
+            ],
+            "variableName": "baseQuery"
+        }
+    ],
+    "tiles": [
+        {
+    "id": "7018d404-75f5-4ab5-92fc-a5780fc2769a",
+    "title": "mygreeterv3 Dashboard",
+    "description": "",
+    "visualType": "markdownCard",
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 8,
+        "height": 2
+    },
+    "query": {
+        "kind": "inline",
+        "usedVariables": [],
+        "text": "## Server Incoming Metrics"
+    },
+    "visualOptions": {}
+},
+{
+    "description": "",
+    "id": "478255c3-5d98-44f2-8630-bf4b845600b6",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 0,
+        "y": 2
+    },
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"server\"\n| where LogMessage[\"method\"] == incomingServerMethod\n| extend timePoint = todatetime(LogMessage[\"time\"])\n| extend code = tostring(LogMessage[\"code\"])\n| summarize \n total = count(),\nerror = countif(code != \"OK\") \nby bin(timePoint,5m)\n| extend ratio = round(error * 100.0/total, 3)\n| project timePoint, ratio",
+        "usedVariables": [
+            "incomingServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "Error ratio (%)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": true,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Ratio",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "timePoint",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "ratio"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "758e4a16-9de2-48d6-a72d-e865f354695d",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 5,
+        "y": 12
+    },
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"server\"\n| where LogMessage[\"method\"] == incomingServerMethod\n| summarize latency = round( avg(todouble(LogMessage[\"time_ms\"])), 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)",
+        "usedVariables": [
+            "incomingServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "Latency by error code (msec)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Latency (msec)",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "LogMessage_time",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "latency"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "7b825a4e-7980-4285-9620-e1731030968a",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 10,
+        "y": 2
+    },
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"server\"\n| where LogMessage[\"method\"] == incomingServerMethod or isempty(incomingServerMethod)\n| summarize QPS = round(count() / binSizeSecond, 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)\n\n",
+        "usedVariables": [
+            "incomingServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "QPS by error code",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Query Per Second",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "LogMessage_time",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "QPS"
+        ]
+    },
+    "visualType": "scatter"
+},
+        {
+    "id": "9d6aa0c4-c5cd-4823-9f98-06c137a58a32",
+    "title": "mygreeterv3 Dashboard",
+    "description": "",
+    "visualType": "markdownCard",
+    "pageId": "dc1ed52b-eb05-4752-99e8-a86f8b7548a2",
+    "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 8,
+        "height": 2
+    },
+    "query": {
+        "kind": "inline",
+        "usedVariables": [],
+        "text": "## Server Outgoing Metrics"
+    },
+    "visualOptions": {}
+},
+{
+    "description": "",
+    "id": "7e4db983-85d6-407d-8701-fcd29a689ab5",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 0,
+        "y": 2
+    },
+    "pageId": "dc1ed52b-eb05-4752-99e8-a86f8b7548a2",
+    "query": {
+        "kind": "inline",
+        "dataSource": {
+            "kind": "inline",
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77"
+        },
+        "usedVariables": [
+            "_endTime",
+            "_startTime",
+            "outgoingServerMethod",
+            "baseQuery"
+        ],
+        "text": "let tempBaseQuery = baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"client\"\n| where LogMessage[\"method\"] == outgoingServerMethod\n| extend timePoint = todatetime(LogMessage[\"time\"]);\n\ntempBaseQuery\n| where LogMessage[\"protocol\"] == \"REST\"\n| extend code = toint(LogMessage[\"code\"])\n| summarize \n total = count(),\nerror = countif(code !between (200 .. 299)) \nby bin(timePoint,5m)\n| extend ratio = round(error * 100.0/total, 3)\n| project timePoint, ratio, protocol=\"REST\"\n\n| union\n\n(tempBaseQuery\n| where LogMessage[\"protocol\"] == \"grpc\"\n| extend code = tostring(LogMessage[\"code\"])\n| summarize \n total = count(),\nerror = countif(code != \"OK\") \nby bin(timePoint,5m)\n| extend ratio = round(error * 100.0/total, 3)\n| project timePoint, ratio, protocol=\"grpc\")\n"
+    },
+    "title": "Error ratio (%)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Ratio",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "timePoint",
+        "xColumnTitle": "",
+        "yColumns": [
+            "ratio"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "9e3de10c-be8a-44d3-a79e-ae1174293ab0",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 5,
+        "y": 12
+    },
+    "pageId": "dc1ed52b-eb05-4752-99e8-a86f8b7548a2",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"client\"\n| where LogMessage[\"method\"] == outgoingServerMethod\n| summarize latency = round( avg(todouble(LogMessage[\"time_ms\"])), 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)",
+        "usedVariables": [
+            "outgoingServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "Latency by error code (msec)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Latency (msec)",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "LogMessage_time",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "latency"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "5905e9cb-b8e8-40c6-9e84-8c1657848ebf",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 10,
+        "y": 2
+    },
+    "pageId": "dc1ed52b-eb05-4752-99e8-a86f8b7548a2",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"client\"\n| where LogMessage[\"method\"] == outgoingServerMethod or isempty(outgoingServerMethod)\n| summarize QPS = round(count() / binSizeSecond, 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)\n\n",
+        "usedVariables": [
+            "outgoingServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "QPS by error code",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Query Per Second",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": null,
+        "xColumnTitle": "",
+        "yColumns": [
+            "QPS"
+        ]
+    },
+    "visualType": "scatter"
+},
+        {
+    "id": "21e6efd2-6c31-456c-b1fe-d1bd290ba2df",
+    "title": "mygreeterv3 Dashboard",
+    "description": "",
+    "visualType": "markdownCard",
+    "pageId": "a8f445c1-3bc4-4bdf-bc4c-bc45cca88f50",
+    "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 8,
+        "height": 2
+    },
+    "query": {
+        "kind": "inline",
+        "usedVariables": [],
+        "text": "## Demo Server Incoming Metrics"
+    },
+    "visualOptions": {}
+},
+{
+    "description": "",
+    "id": "df4deeb4-d4b1-4050-9f9c-89f74ea4dc8a",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 0,
+        "y": 2
+    },
+    "pageId": "a8f445c1-3bc4-4bdf-bc4c-bc45cca88f50",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"server\"\n| where LogMessage[\"method\"] == incomingDemoServerMethod\n| extend timePoint = todatetime(LogMessage[\"time\"])\n| extend code = tostring(LogMessage[\"code\"])\n| summarize \n total = count(),\nerror = countif(code != \"OK\") \nby bin(timePoint,5m)\n| extend ratio = round(error * 100.0/total, 3)\n| project timePoint, ratio",
+        "usedVariables": [
+            "incomingDemoServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "Error ratio (%)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": true,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Ratio",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "timePoint",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "ratio"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "e92071bc-74cb-4121-86f3-bd815ed27cc3",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 5,
+        "y": 12
+    },
+    "pageId": "a8f445c1-3bc4-4bdf-bc4c-bc45cca88f50",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"server\"\n| where LogMessage[\"method\"] == incomingDemoServerMethod\n| summarize latency = round( avg(todouble(LogMessage[\"time_ms\"])), 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)",
+        "usedVariables": [
+            "incomingDemoServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "Latency by error code (msec)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Latency (msec)",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "LogMessage_time",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "latency"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "b2c5a047-365e-49c7-8437-1df2ff0e1738",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 10,
+        "y": 2
+    },
+    "pageId": "a8f445c1-3bc4-4bdf-bc4c-bc45cca88f50",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"server\"\n| where LogMessage[\"method\"] == incomingDemoServerMethod or isempty(incomingDemoServerMethod)\n| summarize QPS = round(count() / binSizeSecond, 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)\n\n",
+        "usedVariables": [
+            "incomingDemoServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "QPS by error code",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Query Per Second",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "LogMessage_time",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "QPS"
+        ]
+    },
+    "visualType": "scatter"
+},
+        {
+    "id": "19811280-bce2-419e-b6c9-958e8a3e4dfa",
+    "title": "mygreeterv3 Dashboard",
+    "description": "",
+    "visualType": "markdownCard",
+    "pageId": "257a05c8-2f16-4c7f-8413-82aafa7ab115",
+    "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 8,
+        "height": 2
+    },
+    "query": {
+        "kind": "inline",
+        "usedVariables": [],
+        "text": "## Demo Server Outgoing Metrics"
+    },
+    "visualOptions": {}
+},
+{
+    "description": "",
+    "id": "1713643e-3610-4715-95a5-68d1ef48c1e9",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 0,
+        "y": 2
+    },
+    "pageId": "257a05c8-2f16-4c7f-8413-82aafa7ab115",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"client\"\n| where LogMessage[\"method\"] == outgoingDemoServerMethod\n| extend timePoint = todatetime(LogMessage[\"time\"])\n| extend code = tostring(LogMessage[\"code\"])\n| summarize \n total = count(),\nerror = countif(code != \"OK\") \nby bin(timePoint,5m)\n| extend ratio = round(error * 100.0/total, 3)\n| project timePoint, ratio",
+        "usedVariables": [
+            "outgoingDemoServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "Error ratio (%)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": true,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Ratio",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "timePoint",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "ratio"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "021d8fca-876e-492b-a037-5151b9db5a74",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 5,
+        "y": 12
+    },
+    "pageId": "257a05c8-2f16-4c7f-8413-82aafa7ab115",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"client\"\n| where LogMessage[\"method\"] == outgoingDemoServerMethod\n| summarize latency = round( avg(todouble(LogMessage[\"time_ms\"])), 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)",
+        "usedVariables": [
+            "outgoingDemoServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "Latency by error code (msec)",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Latency (msec)",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "LogMessage_time",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "latency"
+        ]
+    },
+    "visualType": "scatter"
+},
+{
+    "description": "",
+    "id": "9d683882-c12d-4118-a7dc-e337233c5ab1",
+    "layout": {
+        "height": 10,
+        "width": 10,
+        "x": 10,
+        "y": 2
+    },
+    "pageId": "257a05c8-2f16-4c7f-8413-82aafa7ab115",
+    "query": {
+        "dataSource": {
+            "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "kind": "inline"
+        },
+        "kind": "inline",
+        "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\nbaseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"client\"\n| where LogMessage[\"method\"] == outgoingDemoServerMethod or isempty(outgoingDemoServerMethod)\n| summarize QPS = round(count() / binSizeSecond, 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(todatetime(LogMessage[\"time\"]), binSizeMinute)\n\n",
+        "usedVariables": [
+            "outgoingDemoServerMethod",
+            "_endTime",
+            "_startTime",
+            "baseQuery"
+        ]
+    },
+    "title": "QPS by error code",
+    "visualOptions": {
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthrough": [],
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Query Per Second",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "LogMessage_time",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "QPS"
+        ]
+    },
+    "visualType": "scatter"
+}
+    ],
+    "parameters": [
+    {
+        "kind": "duration",
+        "id": "6160f84a-111a-4ef9-a92d-661eb0796f24",
+        "displayName": "Time range",
+        "description": "",
+        "beginVariableName": "_startTime",
+        "endVariableName": "_endTime",
+        "defaultValue": {
+            "kind": "dynamic",
+            "count": 1,
+            "unit": "hours"
+        },
+        "showOnPages": {
+            "kind": "all"
+        }
+    },
+    {
+        "kind": "string",
+        "id": "23d394a2-a04f-4e15-a04a-9262c5668408",
+        "displayName": "Incoming Server Method",
+        "description": "",
+        "variableName": "incomingServerMethod",
+        "selectionType": "scalar",
+        "includeAllOption": false,
+        "defaultValue": {
+            "kind": "no-selection"
+        },
+        "dataSource": {
+            "kind": "query",
+            "columns": {
+                "value": "LogMessage_method"
+            },
+            "query": {
+                "kind": "inline",
+                "dataSource": {
+                    "kind": "inline",
+                    "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77"
+                },
+                "usedVariables": [
+                    "baseQuery"
+                ],
+                "text": "baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"server\"\n| distinct tostring(LogMessage[\"method\"] )"
+            }
+        },
+        "showOnPages": {
+            "kind": "selection",
+            "pageIds": [
+                "0c7d1052-237a-4600-8cda-b45b91e5c3e5"
+            ]
+        }
+    },
+    {
+        "kind": "string",
+        "id": "e720e097-1a31-49a7-9350-face16a4991c",
+        "displayName": "Outgoing Server Method",
+        "description": "",
+        "variableName": "outgoingServerMethod",
+        "selectionType": "scalar",
+        "includeAllOption": false,
+        "defaultValue": {
+            "kind": "no-selection"
+        },
+        "dataSource": {
+            "kind": "query",
+            "columns": {
+                "value": "LogMessage_method"
+            },
+            "query": {
+                "kind": "inline",
+                "dataSource": {
+                    "kind": "inline",
+                    "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77"
+                },
+                "usedVariables": [
+                    "_endTime",
+                    "_startTime",
+                    "baseQuery"
+                ],
+                "text": "baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-server\"\n| where LogMessage[\"component\"] == \"client\"\n| where strlen(LogMessage[\"method\"]) < 100\n| distinct tostring(LogMessage[\"method\"] )"
+            }
+        },
+        "showOnPages": {
+            "kind": "selection",
+            "pageIds": [
+                "dc1ed52b-eb05-4752-99e8-a86f8b7548a2"
+            ]
+        }
+    },
+    {
+        "kind": "string",
+        "id": "a75ef794-c99b-4c26-9e05-b9fa6f0d4eeb",
+        "displayName": "Incoming Demo Server Method",
+        "description": "",
+        "variableName": "incomingDemoServerMethod",
+        "selectionType": "scalar",
+        "includeAllOption": false,
+        "defaultValue": {
+            "kind": "no-selection"
+        },
+        "dataSource": {
+            "kind": "query",
+            "columns": {
+                "value": "LogMessage_method"
+            },
+            "query": {
+                "kind": "inline",
+                "dataSource": {
+                    "kind": "inline",
+                    "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77"
+                },
+                "usedVariables": [
+                    "baseQuery"
+                ],
+                "text": "baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"server\"\n| distinct tostring(LogMessage[\"method\"] )"
+            }
+        },
+        "showOnPages": {
+            "kind": "selection",
+            "pageIds": [
+                "a8f445c1-3bc4-4bdf-bc4c-bc45cca88f50"
+            ]
+        }
+    },
+    {
+        "kind": "string",
+        "id": "d34a88a3-c1db-4750-b416-3cf52bf5930c",
+        "displayName": "Outgoing Demo Server Method",
+        "description": "",
+        "variableName": "outgoingDemoServerMethod",
+        "selectionType": "scalar",
+        "includeAllOption": false,
+        "defaultValue": {
+            "kind": "no-selection"
+        },
+        "dataSource": {
+            "kind": "query",
+            "columns": {
+                "value": "LogMessage_method"
+            },
+            "query": {
+                "kind": "inline",
+                "dataSource": {
+                    "kind": "inline",
+                    "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77"
+                },
+                "usedVariables": [
+                    "baseQuery"
+                ],
+                "text": "baseQuery\n| where ContainerName == \"servicehub-mygreeterv3-demoserver\"\n| where LogMessage[\"component\"] == \"client\"\n| distinct tostring(LogMessage[\"method\"] )"
+            }
+        },
+        "showOnPages": {
+            "kind": "selection",
+            "pageIds": [
+                "257a05c8-2f16-4c7f-8413-82aafa7ab115"
+            ]
+        }
+    }
+],
+    "dataSources": [
+    {
+        "id": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+        "name": "servicehub-{{.resourcesName}}-data",
+        "clusterUri": "https://ade.loganalytics.io/subscriptions/{{.subscriptionId}}/resourcegroups/servicehub-{{.resourcesName}}-rg/providers/microsoft.operationalinsights/workspaces/servicehub-{{.resourcesName}}-workspace",
+        "database": "servicehub-{{.resourcesName}}-workspace",
+        "kind": "manual-kusto",
+        "scopeId": "kusto"
+    }
+],
+    "pages": [
+    {
+        "id": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+        "name": "Server (Incoming) Metrics"
+    },
+    {
+        "id": "dc1ed52b-eb05-4752-99e8-a86f8b7548a2",
+        "name": "Server (Outgoing) Metrics"
+    },
+    {
+        "id": "a8f445c1-3bc4-4bdf-bc4c-bc45cca88f50",
+        "name": "Demo Server (Incoming) Metrics"
+    },
+    {
+        "id": "257a05c8-2f16-4c7f-8413-82aafa7ab115",
+        "name": "Demo Server (Outgoing) Metrics"
+    }
+]
+}

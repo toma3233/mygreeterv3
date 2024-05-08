@@ -1,0 +1,138 @@
+# Run a Bash script on macOS, Linux, or Windows
+jobs:
+  - job: mygreeterv3TestCoverage
+    displayName: "[mygreeterv3] Generate test coverage reports"
+    pool:
+      vmImage: "ubuntu-latest"
+    steps:
+      - task: Bash@3
+        displayName: Test Suite Check
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/mygreeterv3/server/test/testSuites.sh
+          failOnStderr: false
+      - task: Bash@3
+        displayName: Test Coverage for Output
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/mygreeterv3/server/test/testCoverageOutput.sh
+          failOnStderr: false
+        env:
+          threshold: 5
+          READ_PAT: $(READ_PAT)
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish test coverage as an artifact"
+        inputs:
+          targetPath: "testing/canonical-output/mygreeterv3/server/test/coverage_reports"
+          artifactName: CoverageReports
+  - job: mygreeterv3BuildImage
+    displayName: "[mygreeterv3] Build image"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - GenerateAndPublishEnvConfig
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      #TODO: Change this to split build and push, when build option is available instead of buildx.
+      - task: Bash@3
+        displayName: Build image
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/mygreeterv3/server/test/buildImage.sh
+          failOnStderr: false
+        env:
+          READ_PAT: $(READ_PAT)
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish docker image as an artifact"
+        inputs:
+          targetPath: "testing/canonical-output/mygreeterv3/server/generated/mygreeterv3-image.tar"
+          artifactName: mygreeterv3-image
+  - job: mygreeterv3PushImage
+    displayName: "[mygreeterv3] Push image"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - ProvisionSharedResources
+      - mygreeterv3BuildImage
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download docker image artifact"
+        inputs:
+          artifactName: mygreeterv3-image
+          targetPath: "$(System.DefaultWorkingDirectory)/testing/canonical-output/mygreeterv3/server/generated/"
+      - task: Bash@3
+        displayName: Push image
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/mygreeterv3/server/test/pushImage.sh
+          failOnStderr: false
+        env:
+          AZ_APP_ID: $(AZ_APP_ID)
+          AZ_TENANT_ID: $(AZ_TENANT_ID)
+          AZ_PASSWORD: $(AZ_PASSWORD)
+  - job: mygreeterv3ProvisionServiceResources
+    displayName: "[mygreeterv3] Provision service specific resources"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - ProvisionSharedResources
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      - task: Bash@3
+        displayName: Provision service specific resources
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/mygreeterv3/server/test/provisionServiceResources.sh
+          failOnStderr: false
+        env:
+          AZ_APP_ID: $(AZ_APP_ID)
+          AZ_TENANT_ID: $(AZ_TENANT_ID)
+          AZ_PASSWORD: $(AZ_PASSWORD)
+          READ_PAT: $(READ_PAT)
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish test coverage as an artifact"
+        inputs:
+          targetPath: "testing/canonical-output/mygreeterv3/server/artifacts"
+          artifactName: ArtifactDirectory
+      - task: Bash@3
+        displayName: Prepare all markdown files to publish
+        inputs:
+          targetType: "inline"
+          script: |
+            cd testing/canonical-output/mygreeterv3/server
+            mkdir markdown_files
+            mv resource_provisioning/**/*.md markdown_files
+          failOnStderr: false
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish service specific resource markdown files"
+        inputs:
+          targetPath: "testing/canonical-output/mygreeterv3/server/markdown_files"
+          artifactName: mygreeterv3SpecificResourceMarkdownFiles
+  - job: mygreeterv3DeployService
+    displayName: "[mygreeterv3] Deploy Service"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      - mygreeterv3PushImage
+      - mygreeterv3ProvisionServiceResources
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download artifact directory"
+        inputs:
+          artifactName: ArtifactDirectory
+          targetPath: "$(System.DefaultWorkingDirectory)/testing/canonical-output/mygreeterv3/server/artifacts"
+      - task: Bash@3
+        displayName: Deploy and test service
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/mygreeterv3/server/test/deployService.sh
+          failOnStderr: false
+        env:
+          AZ_APP_ID: $(AZ_APP_ID)
+          AZ_TENANT_ID: $(AZ_TENANT_ID)
+          AZ_PASSWORD: $(AZ_PASSWORD)

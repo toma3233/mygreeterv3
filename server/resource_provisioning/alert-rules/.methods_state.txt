@@ -1,0 +1,11 @@
+SayHello.bicep
+CreateResourceGroup.bicep
+ReadResourceGroup.bicep
+DeleteResourceGroup.bicep
+UpdateResourceGroup.bicep
+ListResourceGroups.bicep
+CreateStorageAccount.bicep
+ReadStorageAccount.bicep
+DeleteStorageAccount.bicep
+UpdateStorageAccount.bicep
+ListStorageAccounts.bicep

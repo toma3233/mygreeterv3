@@ -1,0 +1,11 @@
+SayHello.go
+CreateResourceGroup.go
+ReadResourceGroup.go
+DeleteResourceGroup.go
+UpdateResourceGroup.go
+ListResourceGroups.go
+CreateStorageAccount.go
+ReadStorageAccount.go
+DeleteStorageAccount.go
+UpdateStorageAccount.go
+ListStorageAccounts.go
