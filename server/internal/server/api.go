@@ -81,3 +81,29 @@ func (s *Server) init(options Options) {
 		}
 	}
 }
+
+// Implementing the interface methods for the new blob container operations
+func (s *Server) CreateBlobContainer(ctx context.Context, in *pb.CreateBlobContainerRequest) (*pb.CreateBlobContainerResponse, error) {
+	// Implementation logic for creating a blob container
+	return &pb.CreateBlobContainerResponse{}, nil
+}
+
+func (s *Server) ReadBlobContainer(ctx context.Context, in *pb.ReadBlobContainerRequest) (*pb.ReadBlobContainerResponse, error) {
+	// Implementation logic for reading a blob container
+	return &pb.ReadBlobContainerResponse{}, nil
+}
+
+func (s *Server) UpdateBlobContainer(ctx context.Context, in *pb.UpdateBlobContainerRequest) (*pb.UpdateBlobContainerResponse, error) {
+	// Implementation logic for updating a blob container
+	return &pb.UpdateBlobContainerResponse{}, nil
+}
+
+func (s *Server) DeleteBlobContainer(ctx context.Context, in *pb.DeleteBlobContainerRequest) (*emptypb.Empty, error) {
+	// Implementation logic for deleting a blob container
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Server) ListBlobContainers(ctx context.Context, in *pb.ListBlobContainersRequest) (*pb.ListBlobContainersResponse, error) {
+	// Implementation logic for listing blob containers
+	return &pb.ListBlobContainersResponse{}, nil
+}

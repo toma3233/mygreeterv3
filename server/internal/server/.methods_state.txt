@@ -9,3 +9,8 @@ ReadStorageAccount.go
 DeleteStorageAccount.go
 UpdateStorageAccount.go
 ListStorageAccounts.go
+CreateBlobContainer.go
+ReadBlobContainer.go
+UpdateBlobContainer.go
+DeleteBlobContainer.go
+ListBlobContainers.go
