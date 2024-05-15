@@ -44,6 +44,7 @@ type Options struct {
 	RgName           string
 	RgRegion         string
 	CallAllRGOps     bool
+	ContainerName    string // New field for container name
 }
 
 var options = newOptions()
@@ -63,6 +64,7 @@ func init() {
 	startCmd.Flags().StringVar(&options.RgName, "rg-name", options.RgName, "The name of the resource group")
 	startCmd.Flags().StringVar(&options.RgRegion, "rg-region", options.RgRegion, "The region of the resource group")
 	startCmd.Flags().BoolVar(&options.CallAllRGOps, "call-all-rg-ops", options.CallAllRGOps, "Call all resource group operations")
+	startCmd.Flags().StringVar(&options.ContainerName, "container-name", options.ContainerName, "The name of the blob storage container") // New flag for container name
 }
 
 func newOptions() Options {
@@ -78,6 +80,7 @@ func newOptions() Options {
 		RgName:           "MyGreeter-resource-group",
 		RgRegion:         "eastus",
 		CallAllRGOps:     true,
+		ContainerName:    "MyContainer", // Default value for container name
 	}
 }
 
@@ -228,6 +231,59 @@ func SayHello(client pb.MyGreeterClient, name string, age int32, email string, a
 		_, _, err = service.MyGreeterDeleteResourceGroup(context.Background(), options.RgName)
 		if err != nil {
 			log.Error("Error calling MyGreeterDeleteResourceGroup: " + err.Error())
+		}
+	}
+	// New CRUDL operations for blob storage containers
+	if options.ContainerName != "" {
+		// Create a blob storage container
+		_, err = client.CreateBlobContainer(ctx, &pb.CreateBlobContainerRequest{
+			RgName:        options.RgName,
+			SaName:        storageAccountName,
+			ContainerName: options.ContainerName,
+			Metadata:      map[string]string{"createdBy": "MyGreeterClient"},
+		})
+		if err != nil {
+			log.Error("Error calling CreateBlobContainer: " + err.Error())
+		}
+
+		// Read a blob storage container
+		_, err = client.ReadBlobContainer(ctx, &pb.ReadBlobContainerRequest{
+			RgName:        options.RgName,
+			SaName:        storageAccountName,
+			ContainerName: options.ContainerName,
+		})
+		if err != nil {
+			log.Error("Error calling ReadBlobContainer: " + err.Error())
+		}
+
+		// Update a blob storage container
+		_, err = client.UpdateBlobContainer(ctx, &pb.UpdateBlobContainerRequest{
+			RgName:        options.RgName,
+			SaName:        storageAccountName,
+			ContainerName: options.ContainerName,
+			Metadata:      map[string]string{"updatedBy": "MyGreeterClient"},
+		})
+		if err != nil {
+			log.Error("Error calling UpdateBlobContainer: " + err.Error())
+		}
+
+		// Delete a blob storage container
+		_, err = client.DeleteBlobContainer(ctx, &pb.DeleteBlobContainerRequest{
+			RgName:        options.RgName,
+			SaName:        storageAccountName,
+			ContainerName: options.ContainerName,
+		})
+		if err != nil {
+			log.Error("Error calling DeleteBlobContainer: " + err.Error())
+		}
+
+		// List all blob storage containers
+		_, err = client.ListBlobContainers(ctx, &pb.ListBlobContainersRequest{
+			RgName: options.RgName,
+			SaName: storageAccountName,
+		})
+		if err != nil {
+			log.Error("Error calling ListBlobContainers: " + err.Error())
 		}
 	}
 }

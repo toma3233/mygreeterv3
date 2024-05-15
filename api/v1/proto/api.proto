@@ -9,9 +9,6 @@ import "protoc-gen-openapiv2/options/annotations.proto";
 // https://protobuf.dev/reference/go/go-generated/#package
 option go_package = "dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/api/v1";
 
-// More info on how to use REST api
-// https://cloud.google.com/endpoints/docs/grpc/transcoding#map_a_get_method
-
 // The greeting service definition.
 service MyGreeter {
   // Sends a greeting
@@ -130,6 +127,59 @@ service MyGreeter {
       description: "This operation lists all the storage accounts."
     };
   }
+
+  // Creates a blob storage container
+  rpc CreateBlobContainer (CreateBlobContainerRequest) returns (CreateBlobContainerResponse) {
+    option (google.api.http) = {
+      post: "/v1/resourcegroups/{rgName}/storageaccounts/{saName}/blobcontainers"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Create a blob storage container"
+      description: "This operation creates a new blob storage container."
+    };
+  }
+  // Reads a blob storage container
+  rpc ReadBlobContainer (ReadBlobContainerRequest) returns (ReadBlobContainerResponse) {
+    option (google.api.http) = {
+      get: "/v1/resourcegroups/{rgName}/storageaccounts/{saName}/blobcontainers/{containerName}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Read a blob storage container"
+      description: "This operation reads the details of a blob storage container."
+    };
+  }
+  // Deletes a blob storage container
+  rpc DeleteBlobContainer (DeleteBlobContainerRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/resourcegroups/{rgName}/storageaccounts/{saName}/blobcontainers/{containerName}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Delete a blob storage container"
+      description: "This operation deletes a blob storage container."
+    };
+  }
+  // Updates a blob storage container
+  rpc UpdateBlobContainer (UpdateBlobContainerRequest) returns (UpdateBlobContainerResponse) {
+    option (google.api.http) = {
+      put: "/v1/resourcegroups/{rgName}/storageaccounts/{saName}/blobcontainers/{containerName}"
+      body: "metadata"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Update a blob storage container"
+      description: "This operation updates the metadata of a blob storage container."
+    };
+  }
+  // Lists all blob storage containers
+  rpc ListBlobContainers (ListBlobContainersRequest) returns (ListBlobContainersResponse) {
+    option (google.api.http) = {
+      get: "/v1/resourcegroups/{rgName}/storageaccounts/{saName}/blobcontainers"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List all blob storage containers"
+      description: "This operation lists all the blob storage containers."
+    };
+  }
 }
 
 message HelloRequest {
@@ -242,4 +292,58 @@ message StorageAccount {
   string id = 1;
   string name = 2;
   string location = 3;
+}
+
+// Blob storage container messages
+message CreateBlobContainerRequest {
+  string rgName = 1;
+  string saName = 2;
+  string containerName = 3;
+  map<string, string> metadata = 4;
+}
+
+message CreateBlobContainerResponse {
+  string name = 1;
+}
+
+message ReadBlobContainerRequest {
+  string rgName = 1;
+  string saName = 2;
+  string containerName = 3;
+}
+
+message ReadBlobContainerResponse {
+  BlobContainer blobContainer = 1;
+}
+
+message DeleteBlobContainerRequest {
+  string rgName = 1;
+  string saName = 2;
+  string containerName = 3;
+}
+
+message UpdateBlobContainerRequest {
+  string rgName = 1;
+  string saName = 2;
+  string containerName = 3;
+  map<string, string> metadata = 4;
+}
+
+message UpdateBlobContainerResponse {
+  BlobContainer blobContainer = 1;
+}
+
+message ListBlobContainersRequest {
+  string rgName = 1;
+  string saName = 2;
+}
+
+message ListBlobContainersResponse {
+  repeated BlobContainer containersList = 1;
+}
+
+message BlobContainer {
+  string id = 1;
+  string name = 2;
+  map<string, string> metadata = 3;
 }
