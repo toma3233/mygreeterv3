@@ -22,3 +22,8 @@ func NewServer() *Server {
 
 func (s *Server) init(options Options) {
 }
+
+func (s *Server) SayGoodBye(ctx context.Context, req *pb.HelloRequest) (*pb.HelloReply, error) {
+	// Implementation will be added in a separate file
+	return nil, nil
+}

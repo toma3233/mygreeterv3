@@ -30,6 +30,12 @@ var startCmd = &cobra.Command{
 	Run:   hello,
 }
 
+var goodbyeCmd = &cobra.Command{
+	Use:   "goodbye",
+	Short: "Call SayGoodBye",
+	Run:   goodbye,
+}
+
 var output io.Writer = os.Stdout
 
 type Options struct {
@@ -50,6 +56,7 @@ var options = newOptions()
 
 func init() {
 	rootCmd.AddCommand(startCmd)
+	rootCmd.AddCommand(goodbyeCmd)
 
 	startCmd.Flags().StringVar(&options.RemoteAddr, "remote-addr", options.RemoteAddr, "the remote server's addr for this client to connect to")
 	startCmd.Flags().StringVar(&options.HttpAddr, "http-addr", options.HttpAddr, "the remote http gateway addr")
@@ -105,6 +112,30 @@ func hello(cmd *cobra.Command, args []string) {
 	}
 	for {
 		SayHello(client, options.Name, options.Age, options.Email, options.Address, logger)
+		time.Sleep(time.Duration(options.IntervalMilliSec) * time.Millisecond)
+	}
+}
+
+func goodbye(cmd *cobra.Command, args []string) {
+	logger := log.New(log.NewTextHandler(output, nil).WithAttrs(logattrs.GetAttrs()))
+	if options.JsonLog {
+		logger = log.New(log.NewJSONHandler(output, nil).WithAttrs(logattrs.GetAttrs()))
+	}
+
+	log.SetDefault(logger)
+
+	client, err := client.NewClient(options.RemoteAddr, interceptor.GetClientInterceptorLogOptions(logger, logattrs.GetAttrs()))
+	// logging the error for transparency, retry interceptor will handle it
+	if err != nil {
+		log.Error("did not connect: " + err.Error())
+	}
+
+	if options.IntervalMilliSec < 0 {
+		SayGoodBye(client, options.Name, options.Age, options.Email, options.Address, logger)
+		return
+	}
+	for {
+		SayGoodBye(client, options.Name, options.Age, options.Email, options.Address, logger)
 		time.Sleep(time.Duration(options.IntervalMilliSec) * time.Millisecond)
 	}
 }
@@ -229,5 +260,30 @@ func SayHello(client pb.MyGreeterClient, name string, age int32, email string, a
 		if err != nil {
 			log.Error("Error calling MyGreeterDeleteResourceGroup: " + err.Error())
 		}
+	}
+}
+
+func SayGoodBye(client pb.MyGreeterClient, name string, age int32, email string, address string, logger *log.Logger) {
+	ctx := context.Background()
+
+	addressParts := strings.Split(address, ",")
+	street := addressParts[0]
+	city := addressParts[1]
+	stateAndZip := strings.Split(addressParts[2], " ")
+	state := stateAndZip[1]
+	parseZipcode, _ := strconv.ParseInt(stateAndZip[2], 10, 32)
+	zipcode := int32(parseZipcode)
+
+	addr := &pb.Address{
+		Street:  street,
+		City:    city,
+		State:   state,
+		Zipcode: zipcode,
+	}
+	r, err := client.SayGoodBye(ctx, &pb.HelloRequest{Name: name, Age: age, Email: email, Address: addr})
+	if err != nil {
+		log.Info("SayGoodBye error: " + err.Error())
+	} else {
+		log.Info("Response message: " + r.GetMessage())
 	}
 }

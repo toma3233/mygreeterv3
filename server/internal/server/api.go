@@ -14,6 +14,7 @@ import (
 
 	"dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/api/v1/client"
 	serviceHubPolicy "github.com/Azure/aks-middleware/policy"
+	"context"
 )
 
 type Server struct {
@@ -80,4 +81,9 @@ func (s *Server) init(options Options) {
 			log.Error("did not connect: " + err.Error())
 		}
 	}
+}
+
+func (s *Server) SayGoodBye(ctx context.Context, req *pb.HelloRequest) (*pb.HelloReply, error) {
+	// Implementation will be added in a separate file
+	return nil, nil
 }
