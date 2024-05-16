@@ -25,6 +25,17 @@ service MyGreeter {
       description: "This operation sends a greeting to the user."
     };
   }
+  // Sends a goodbye
+  rpc SayGoodBye (HelloRequest) returns (HelloReply) {
+    option (google.api.http) = {
+      post: "/v1/goodbye"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Send a goodbye"
+      description: "This operation sends a goodbye to the user."
+    };
+  }
   // Creates a resource group
   rpc CreateResourceGroup (CreateResourceGroupRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
