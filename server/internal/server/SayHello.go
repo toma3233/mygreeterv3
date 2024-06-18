@@ -36,3 +36,14 @@ func (s *Server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 
 	return out, err
 }
+
+func (s *Server) SayGoodbye(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	if in.GetName() == "TestPanic" {
+		panic("testing panic for SayGoodbye")
+	}
+	logger := ctxlogger.GetLogger(ctx)
+	logger.Info("API handler logger output for SayGoodbye. req: " + in.String())
+
+	time.Sleep(400 * time.Millisecond)
+	return &pb.HelloReply{Message: "Echo back what you sent me (SayGoodbye): " + in.GetName() + " " + strconv.Itoa(int(in.GetAge())) + " " + in.GetEmail()}, nil
+}

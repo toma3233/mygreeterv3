@@ -9,3 +9,4 @@ ReadStorageAccount.bicep
 DeleteStorageAccount.bicep
 UpdateStorageAccount.bicep
 ListStorageAccounts.bicep
+SayGoodbye.bicep
