@@ -44,6 +44,15 @@ module managedIdentity 'br/public:avm/res/managed-identity/user-assigned-identit
   }
 }
 
+module ownerManagedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.2.1' = {
+  name: 'servicehub-mygreeterv3-owner-managed-identity'
+  scope: resourceGroup(subscriptionId, resourceGroupName)
+  params: {
+    name: 'servicehub-mygreeterv3-owner-managed-identity'
+    location: rg.location
+  }
+}
+
 // TODO: migrate to use bicep module registry once it's available
 module azureSdkRoleAssignment 'br:servicehubregistry.azurecr.io/bicep/modules/subscription-role-assignment:v3' = {
   name: 'servicehub-mygreeterv3-azuresdk-role-assignmentDeploy'
@@ -53,6 +62,19 @@ module azureSdkRoleAssignment 'br:servicehubregistry.azurecr.io/bicep/modules/su
     location: rg.location
     roleDefinitionId: 'b24988ac-6180-42a0-ab88-20f7382dd24c' // Contributor
     principalId: managedIdentity.outputs.principalId
+    principalType: 'ServicePrincipal'
+    sharedResource: false
+  }
+}
+
+module ownerRoleAssignment 'br:servicehubregistry.azurecr.io/bicep/modules/subscription-role-assignment:v3' = {
+  name: 'servicehub-mygreeterv3-owner-role-assignmentDeploy'
+  scope: subscription(subscriptionId)
+  params: {
+    name: guid('servicehub-mygreeterv3-ownerRoleAssignment', subscriptionId, 'Owner', ownerManagedIdentity.outputs.principalId)
+    location: rg.location
+    roleDefinitionId: '8e3af657-a8ff-443c-a75c-2fe8c4bcb635' // Owner
+    principalId: ownerManagedIdentity.outputs.principalId
     principalType: 'ServicePrincipal'
     sharedResource: false
   }
