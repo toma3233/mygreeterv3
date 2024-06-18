@@ -59,4 +59,39 @@ var _ = Describe("Client Cobra Cmd test", func() {
 		hello(cmd, nil)
 		Expect(buf.String()).To(ContainSubstring("connect: connection refused"))
 	})
+
+	It("should call SayGoodbye() and log the response message", func() {
+		var buf bytes.Buffer
+		SetOutput(&buf)
+
+		host := fmt.Sprintf("localhost:%d", serverPort)
+		options.RemoteAddr = host
+		options.JsonLog = true
+
+		sayGoodbye(cmd, nil)
+		Expect(buf.String()).To(ContainSubstring("Echo back what you sent me (SayGoodbye)"))
+	})
 })
+
+func sayGoodbye(cmd *cobra.Command, args []string) {
+	logger := log.New(log.NewTextHandler(output, nil))
+	if options.JsonLog {
+		logger = log.New(log.NewJSONHandler(output, nil))
+	}
+
+	log.SetDefault(logger)
+
+	client, err := client.NewClient(options.RemoteAddr, interceptor.GetClientInterceptorLogOptions(logger, logattrs.GetAttrs()))
+	if err != nil {
+		log.Error("did not connect: " + err.Error())
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err = client.SayGoodbye(ctx, &pb.HelloRequest{Name: options.Name, Age: options.Age, Email: options.Email})
+	if err != nil {
+		log.Error("could not greet: " + err.Error())
+	}
+}

@@ -37,6 +37,21 @@ func sayHello(buf *bytes.Buffer, port int, req *pb.HelloRequest) {
 	client.SayHello(ctx, req)
 }
 
+func sayGoodbye(buf *bytes.Buffer, port int, req *pb.HelloRequest) {
+	logger := log.New(log.NewTextHandler(buf, nil))
+	host := fmt.Sprintf("localhost:%d", port)
+	options := interceptor.GetClientInterceptorLogOptions(logger, logattrs.GetAttrs())
+	options.APIOutput = buf
+	client, err := client.NewClient(host, options)
+	// logging the error for transparency, but not failing the test since retry interceptor will handle it
+	if err != nil {
+		log.Error("did not connect: " + err.Error())
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	client.SayGoodbye(ctx, req)
+}
+
 func AllocatePort() int {
 	port := GetFreePort()
 	Expect(port).ToNot(Equal(-1)) // must dynamically allocate port
@@ -157,6 +172,14 @@ var _ = Describe("Interceptor test", func() {
 			Expect(buf.String()).To(ContainSubstring("SayHello.go, line:"))
 			Expect(strings.Count(buf.String(), "code=Unknown")).To(Equal(1)) // must handle panic by returning gRPC code unknown and output filename/line # of panic
 		})
+
+		It("should call SayGoodbye and return successfully", func() {
+			var buf bytes.Buffer
+			sayGoodbye(&buf, serverPort, in)
+			Expect(strings.Count(buf.String(), "request-id")).To(Equal(1))
+			Expect(strings.Count(buf.String(), "OK")).To(Equal(1)) // must not retry
+			Expect(buf.String()).To(ContainSubstring("Echo back what you sent me (SayGoodbye): Bob 53 test@test.com")) // must return successful message
+		})
 	})
 
 	Context("when the server is unavailable", func() {
@@ -220,5 +243,24 @@ var _ = Describe("REST call test", func() {
 
 			Expect(resp.Message).To(ContainSubstring("Echo back what you sent me (SayHello): MyName 53 test@test.com"))
 		})
-	})
-})
+
+		It("should return successfully when making SayGoodbye call", func() {
+			logger := log.New(log.NewTextHandler(os.Stdout, nil))
+			// Create a new Configuration instance
+			cfg := &restsdk.Configuration{
+				BasePath:      fmt.Sprintf("http://0.0.0.0:%d", httpPort),
+				DefaultHeader: make(map[string]string),
+				UserAgent:     "Swagger-Codegen/1.0.0/go",
+				HTTPClient:    restlogger.NewLoggingClient(logger),
+			}
+
+			apiClient := restsdk.NewAPIClient(cfg)
+
+			service := apiClient.MyGreeterApi
+
+			goodbyeRequestBody := restsdk.HelloRequest{
+				Name:  "MyName",
+				Age:   53,
+				Email: "test@test.com",
+			}
+			resp, _, err := service.MyGreeterSayGoodbye(context.Background(), goodbye
