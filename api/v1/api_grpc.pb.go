@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	MyGreeter_SayHello_FullMethodName             = "/MyGreeter/SayHello"
+	MyGreeter_SayGoodbye_FullMethodName           = "/MyGreeter/SayGoodbye"
 	MyGreeter_CreateResourceGroup_FullMethodName  = "/MyGreeter/CreateResourceGroup"
 	MyGreeter_ReadResourceGroup_FullMethodName    = "/MyGreeter/ReadResourceGroup"
 	MyGreeter_DeleteResourceGroup_FullMethodName  = "/MyGreeter/DeleteResourceGroup"
@@ -39,6 +40,8 @@ const (
 type MyGreeterClient interface {
 	// Sends a greeting
 	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error)
+	// Sends a goodbye
+	SayGoodbye(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error)
 	// Creates a resource group
 	CreateResourceGroup(ctx context.Context, in *CreateResourceGroupRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Reads a resource group
@@ -72,6 +75,15 @@ func NewMyGreeterClient(cc grpc.ClientConnInterface) MyGreeterClient {
 func (c *myGreeterClient) SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error) {
 	out := new(HelloReply)
 	err := c.cc.Invoke(ctx, MyGreeter_SayHello_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myGreeterClient) SayGoodbye(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error) {
+	out := new(HelloReply)
+	err := c.cc.Invoke(ctx, MyGreeter_SayGoodbye_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -174,6 +186,8 @@ func (c *myGreeterClient) ListStorageAccounts(ctx context.Context, in *ListStora
 type MyGreeterServer interface {
 	// Sends a greeting
 	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
+	// Sends a goodbye
+	SayGoodbye(context.Context, *HelloRequest) (*HelloReply, error)
 	// Creates a resource group
 	CreateResourceGroup(context.Context, *CreateResourceGroupRequest) (*emptypb.Empty, error)
 	// Reads a resource group
@@ -203,6 +217,9 @@ type UnimplementedMyGreeterServer struct {
 
 func (UnimplementedMyGreeterServer) SayHello(context.Context, *HelloRequest) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+}
+func (UnimplementedMyGreeterServer) SayGoodbye(context.Context, *HelloRequest) (*HelloReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SayGoodbye not implemented")
 }
 func (UnimplementedMyGreeterServer) CreateResourceGroup(context.Context, *CreateResourceGroupRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateResourceGroup not implemented")
@@ -261,6 +278,24 @@ func _MyGreeter_SayHello_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MyGreeterServer).SayHello(ctx, req.(*HelloRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MyGreeter_SayGoodbye_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HelloRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MyGreeterServer).SayGoodbye(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MyGreeter_SayGoodbye_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MyGreeterServer).SayGoodbye(ctx, req.(*HelloRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -427,76 +462,4 @@ func _MyGreeter_UpdateStorageAccount_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MyGreeter_ListStorageAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListStorageAccountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MyGreeterServer).ListStorageAccounts(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: MyGreeter_ListStorageAccounts_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyGreeterServer).ListStorageAccounts(ctx, req.(*ListStorageAccountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// MyGreeter_ServiceDesc is the grpc.ServiceDesc for MyGreeter service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var MyGreeter_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "MyGreeter",
-	HandlerType: (*MyGreeterServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "SayHello",
-			Handler:    _MyGreeter_SayHello_Handler,
-		},
-		{
-			MethodName: "CreateResourceGroup",
-			Handler:    _MyGreeter_CreateResourceGroup_Handler,
-		},
-		{
-			MethodName: "ReadResourceGroup",
-			Handler:    _MyGreeter_ReadResourceGroup_Handler,
-		},
-		{
-			MethodName: "DeleteResourceGroup",
-			Handler:    _MyGreeter_DeleteResourceGroup_Handler,
-		},
-		{
-			MethodName: "UpdateResourceGroup",
-			Handler:    _MyGreeter_UpdateResourceGroup_Handler,
-		},
-		{
-			MethodName: "ListResourceGroups",
-			Handler:    _MyGreeter_ListResourceGroups_Handler,
-		},
-		{
-			MethodName: "CreateStorageAccount",
-			Handler:    _MyGreeter_CreateStorageAccount_Handler,
-		},
-		{
-			MethodName: "ReadStorageAccount",
-			Handler:    _MyGreeter_ReadStorageAccount_Handler,
-		},
-		{
-			MethodName: "DeleteStorageAccount",
-			Handler:    _MyGreeter_DeleteStorageAccount_Handler,
-		},
-		{
-			MethodName: "UpdateStorageAccount",
-			Handler:    _MyGreeter_UpdateStorageAccount_Handler,
-		},
-		{
-			MethodName: "ListStorageAccounts",
-			Handler:    _MyGreeter_ListStorageAccounts_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "api.proto",
-}
+func _MyGreeter_ListStorageAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (
