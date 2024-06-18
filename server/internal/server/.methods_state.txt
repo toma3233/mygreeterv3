@@ -9,3 +9,4 @@ ReadStorageAccount.go
 DeleteStorageAccount.go
 UpdateStorageAccount.go
 ListStorageAccounts.go
+SayGoodbye.go
