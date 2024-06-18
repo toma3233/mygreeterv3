@@ -17,7 +17,7 @@ Note that we use the remote aks middleware. This middleware is responsible for f
 
 ### Run Service Locally
 
-There is a simple way to run the MyGreeter service, after everything has been properly generated. Inside the MyGreeter directory, you can run the client, demoserver and server.
+There is a simple way to run the MyGreeter service, after everything has been properly generated. Inside the MyGreeter directory, you can run the client and server.
 
 #### Server
 
@@ -35,12 +35,6 @@ To run the server with the azureSDK calls enabled:
 go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/server start --enable-azureSDK-calls true --subscription-id <sub_id>
 ```
 
-By default, the sayHello calls are served directly by the server. In order to forward the call to the demoserver:
-
-```bash
-go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/server start --remote-addr <remote_addr>
-```
-
 #### Client
 
 To run the client:
@@ -55,22 +49,6 @@ By default the client sends messages to port `localhost:50051`. This can be chan
 go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client hello --remote-addr <remote_addr>
 ```
 
-#### Demoserver
-
-To run the demoserver, you must use a different port than the server is already using, so you can send messages to the demoserver from the server.
-
-To run the demoserver:
-
-```bash
-go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/demoserver start
-```
-
-To run the demoserver in a particular port:
-
-```bash
-go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/demoserver start --port <local_port>
-```
-
 #### Help
 
 You can run help on every command in order to get more information on how to use them.
@@ -79,8 +57,6 @@ Examples:
 
 ```bash
 go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client help
-
-go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/demoserver start -h
 ```
 
 ### Resource Provisioning
@@ -172,16 +148,6 @@ kubectl get pods -n servicehub-mygreeterv3-server
 # check logs
 export SERVER_POD=$(kubectl get pod -n servicehub-mygreeterv3-server -o jsonpath="{.items[0].metadata.name}")
 kubectl logs $SERVER_POD -n servicehub-mygreeterv3-server
-```
-
-Demoserver:
-```bash
-# check if pod is running
-kubectl get pods -n servicehub-mygreeterv3-demoserver
-
-# check logs
-export DEMOSERVER_POD=$(kubectl get pod -n servicehub-mygreeterv3-demoserver-o jsonpath="{.items[0].metadata.name}")
-kubectl logs $DEMOSERVER_POD -n servicehub-mygreeterv3-demoserver
 ```
 
 Client
