@@ -22,6 +22,8 @@ server/Dockerfile
 server/Makefile
 server/artifacts
 server/artifacts/.gitignore
+server/artifacts/README.md
+server/artifacts/template-Makefile
 server/cmd
 server/cmd/client
 server/cmd/client/client_suite_test.go
@@ -74,7 +76,6 @@ server/internal/server/CreateResourceGroup.go
 server/internal/server/CreateStorageAccount.go
 server/internal/server/DeleteResourceGroup.go
 server/internal/server/DeleteStorageAccount.go
-server/internal/server/ListResourceGroups.go
 server/internal/server/ListStorageAccounts.go
 server/internal/server/ReadResourceGroup.go
 server/internal/server/ReadStorageAccount.go

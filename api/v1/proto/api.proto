@@ -67,16 +67,6 @@ service MyGreeter {
       description: "This operation updates the tags of a resource group."
     };
   }
-  // Lists all resource groups
-  rpc ListResourceGroups (google.protobuf.Empty) returns (ListResourceGroupResponse) {
-    option (google.api.http) = {
-      get: "/v1/resourcegroups"
-    };
-    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary: "List all resource groups"
-      description: "This operation lists all the resource groups."
-    };
-  }
 
    // Creates a storage account
   rpc CreateStorageAccount (CreateStorageAccountRequest) returns (CreateStorageAccountResponse) {
