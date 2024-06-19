@@ -27,9 +27,9 @@ var _ = Describe("Client Cobra Cmd test", func() {
 		}, 10*time.Second).Should(BeTrue())
 
 		cmd = &cobra.Command{
-			Use:   "hello",
-			Short: "Call SayHello",
-			Run:   hello,
+			Use:   "goodbye",
+			Short: "Call SayGoodbye",
+			Run:   goodbye,
 		}
 	})
 
@@ -45,8 +45,8 @@ var _ = Describe("Client Cobra Cmd test", func() {
 		options.RemoteAddr = host
 		options.JsonLog = true
 
-		hello(cmd, nil)
-		Expect(buf.String()).To(ContainSubstring("Echo back what you sent me (SayHello)"))
+		goodbye(cmd, nil)
+		Expect(buf.String()).To(ContainSubstring("Echo back what you sent me (SayGoodbye)"))
 	})
 
 	It("should call Execute() and log error", func() {
@@ -56,7 +56,7 @@ var _ = Describe("Client Cobra Cmd test", func() {
 		options.RemoteAddr = "fakeaddr"
 		options.JsonLog = true
 
-		hello(cmd, nil)
+		goodbye(cmd, nil)
 		Expect(buf.String()).To(ContainSubstring("connect: connection refused"))
 	})
 })
