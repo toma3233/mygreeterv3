@@ -1,9 +1,5 @@
 # mygreeterv3
 
-
-
-
-
 ## Setup and Development
 
 Note that we use the remote aks middleware. This middleware is responsible for features such as logging, retry, and input validation. To learn more, please visit the [repo](https://github.com/Azure/aks-middleware/tree/main).
@@ -201,3 +197,37 @@ kubectl logs $CLIENT_POD -n servicehub-mygreeterv3-client
 ## Monitoring
 
 To view your service in Azure Data Explorer (ADX), follow [ADX dashboard creation/update instructions](server/monitoring/README.md).
+
+## Blob Storage Container Operations
+
+The service now includes CRUDL operations for blob storage containers within a storage account in a resource group. These operations allow you to create, read, update, delete, and list blob storage containers. Here are examples of how to use these new operations:
+
+### Create a Blob Storage Container
+
+```bash
+go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client create-blob-container --rg-name "MyResourceGroup" --sa-name "MyStorageAccount" --container-name "MyContainer"
+```
+
+### Read a Blob Storage Container
+
+```bash
+go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client read-blob-container --rg-name "MyResourceGroup" --sa-name "MyStorageAccount" --container-name "MyContainer"
+```
+
+### Update a Blob Storage Container
+
+```bash
+go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client update-blob-container --rg-name "MyResourceGroup" --sa-name "MyStorageAccount" --container-name "MyContainer" --metadata "key1=value1,key2=value2"
+```
+
+### Delete a Blob Storage Container
+
+```bash
+go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client delete-blob-container --rg-name "MyResourceGroup" --sa-name "MyStorageAccount" --container-name "MyContainer"
+```
+
+### List Blob Storage Containers
+
+```bash
+go run dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server/cmd/client list-blob-containers --rg-name "MyResourceGroup" --sa-name "MyStorageAccount"
+```

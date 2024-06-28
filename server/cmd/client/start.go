@@ -44,6 +44,8 @@ type Options struct {
 	RgName           string
 	RgRegion         string
 	CallAllRGOps     bool
+	StorageAccountURL string
+	ContainerName     string
 }
 
 var options = newOptions()
@@ -63,6 +65,8 @@ func init() {
 	startCmd.Flags().StringVar(&options.RgName, "rg-name", options.RgName, "The name of the resource group")
 	startCmd.Flags().StringVar(&options.RgRegion, "rg-region", options.RgRegion, "The region of the resource group")
 	startCmd.Flags().BoolVar(&options.CallAllRGOps, "call-all-rg-ops", options.CallAllRGOps, "Call all resource group operations")
+	startCmd.Flags().StringVar(&options.StorageAccountURL, "storage-account-url", options.StorageAccountURL, "The URL of the storage account")
+	startCmd.Flags().StringVar(&options.ContainerName, "container-name", options.ContainerName, "The name of the blob container")
 }
 
 func newOptions() Options {
@@ -78,6 +82,8 @@ func newOptions() Options {
 		RgName:           "MyGreeter-resource-group",
 		RgRegion:         "eastus",
 		CallAllRGOps:     true,
+		StorageAccountURL: "",
+		ContainerName:     "",
 	}
 }
 
