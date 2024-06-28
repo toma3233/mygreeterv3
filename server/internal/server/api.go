@@ -11,23 +11,17 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 
 	"dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/api/v1/client"
 	serviceHubPolicy "github.com/Azure/aks-middleware/policy"
 )
 
 type Server struct {
-	// When the UnimplementedMyGreeterServer struct is embedded,
-	// the generated method/implementation in .pb file will be associated with this struct.
-	// If this struct doesn't implment some methods,
-	// the .pb ones will be used. If this struct implement the methods, it will override the .pb ones.
-	// The reason is that anonymous field's methods are promoted to the struct.
-	//
-	// When this struct is NOT embedded,, all methods have to be implemented to meet the interface requirement.
-	// See https://go.dev/ref/spec#Struct_types.
 	pb.UnimplementedMyGreeterServer
 	ResourceGroupClient *armresources.ResourceGroupsClient
 	AccountsClient      *armstorage.AccountsClient
+	BlobContainersClient *azblob.ContainerClient
 	client              pb.MyGreeterClient
 }
 
@@ -71,6 +65,13 @@ func (s *Server) init(options Options) {
 			log.Error(err.Error())
 			os.Exit(1)
 		}
+		// Initialize BlobContainersClient
+		blobServiceClient, err := azblob.NewServiceClientWithNoCredential(options.StorageAccountURL, nil)
+		if err != nil {
+			log.Error("Failed to create BlobServiceClient: ", err)
+			return
+		}
+		s.BlobContainersClient = blobServiceClient.NewContainerClient(options.ContainerName)
 	}
 
 	if options.RemoteAddr != "" {

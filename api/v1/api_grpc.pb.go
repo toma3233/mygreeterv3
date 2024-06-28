@@ -31,6 +31,11 @@ const (
 	MyGreeter_DeleteStorageAccount_FullMethodName = "/MyGreeter/DeleteStorageAccount"
 	MyGreeter_UpdateStorageAccount_FullMethodName = "/MyGreeter/UpdateStorageAccount"
 	MyGreeter_ListStorageAccounts_FullMethodName  = "/MyGreeter/ListStorageAccounts"
+	MyGreeter_CreateBlobContainer_FullMethodName  = "/MyGreeter/CreateBlobContainer"
+	MyGreeter_ReadBlobContainer_FullMethodName    = "/MyGreeter/ReadBlobContainer"
+	MyGreeter_DeleteBlobContainer_FullMethodName  = "/MyGreeter/DeleteBlobContainer"
+	MyGreeter_UpdateBlobContainer_FullMethodName  = "/MyGreeter/UpdateBlobContainer"
+	MyGreeter_ListBlobContainers_FullMethodName   = "/MyGreeter/ListBlobContainers"
 )
 
 // MyGreeterClient is the client API for MyGreeter service.
@@ -59,6 +64,16 @@ type MyGreeterClient interface {
 	UpdateStorageAccount(ctx context.Context, in *UpdateStorageAccountRequest, opts ...grpc.CallOption) (*UpdateStorageAccountResponse, error)
 	// Lists all storage accounts
 	ListStorageAccounts(ctx context.Context, in *ListStorageAccountRequest, opts ...grpc.CallOption) (*ListStorageAccountResponse, error)
+	// Creates a blob storage container
+	CreateBlobContainer(ctx context.Context, in *CreateBlobContainerRequest, opts ...grpc.CallOption) (*CreateBlobContainerResponse, error)
+	// Reads a blob storage container
+	ReadBlobContainer(ctx context.Context, in *ReadBlobContainerRequest, opts ...grpc.CallOption) (*ReadBlobContainerResponse, error)
+	// Deletes a blob storage container
+	DeleteBlobContainer(ctx context.Context, in *DeleteBlobContainerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Updates a blob storage container
+	UpdateBlobContainer(ctx context.Context, in *UpdateBlobContainerRequest, opts ...grpc.CallOption) (*UpdateBlobContainerResponse, error)
+	// Lists all blob storage containers
+	ListBlobContainers(ctx context.Context, in *ListBlobContainersRequest, opts ...grpc.CallOption) (*ListBlobContainersResponse, error)
 }
 
 type myGreeterClient struct {
@@ -168,6 +183,51 @@ func (c *myGreeterClient) ListStorageAccounts(ctx context.Context, in *ListStora
 	return out, nil
 }
 
+func (c *myGreeterClient) CreateBlobContainer(ctx context.Context, in *CreateBlobContainerRequest, opts ...grpc.CallOption) (*CreateBlobContainerResponse, error) {
+	out := new(CreateBlobContainerResponse)
+	err := c.cc.Invoke(ctx, MyGreeter_CreateBlobContainer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myGreeterClient) ReadBlobContainer(ctx context.Context, in *ReadBlobContainerRequest, opts ...grpc.CallOption) (*ReadBlobContainerResponse, error) {
+	out := new(ReadBlobContainerResponse)
+	err := c.cc.Invoke(ctx, MyGreeter_ReadBlobContainer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myGreeterClient) DeleteBlobContainer(ctx context.Context, in *DeleteBlobContainerRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, MyGreeter_DeleteBlobContainer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myGreeterClient) UpdateBlobContainer(ctx context.Context, in *UpdateBlobContainerRequest, opts ...grpc.CallOption) (*UpdateBlobContainerResponse, error) {
+	out := new(UpdateBlobContainerResponse)
+	err := c.cc.Invoke(ctx, MyGreeter_UpdateBlobContainer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *myGreeterClient) ListBlobContainers(ctx context.Context, in *ListBlobContainersRequest, opts ...grpc.CallOption) (*ListBlobContainersResponse, error) {
+	out := new(ListBlobContainersResponse)
+	err := c.cc.Invoke(ctx, MyGreeter_ListBlobContainers_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MyGreeterServer is the server API for MyGreeter service.
 // All implementations must embed UnimplementedMyGreeterServer
 // for forward compatibility
@@ -194,6 +254,16 @@ type MyGreeterServer interface {
 	UpdateStorageAccount(context.Context, *UpdateStorageAccountRequest) (*UpdateStorageAccountResponse, error)
 	// Lists all storage accounts
 	ListStorageAccounts(context.Context, *ListStorageAccountRequest) (*ListStorageAccountResponse, error)
+	// Creates a blob storage container
+	CreateBlobContainer(context.Context, *CreateBlobContainerRequest) (*CreateBlobContainerResponse, error)
+	// Reads a blob storage container
+	ReadBlobContainer(context.Context, *ReadBlobContainerRequest) (*ReadBlobContainerResponse, error)
+	// Deletes a blob storage container
+	DeleteBlobContainer(context.Context, *DeleteBlobContainerRequest) (*emptypb.Empty, error)
+	// Updates a blob storage container
+	UpdateBlobContainer(context.Context, *UpdateBlobContainerRequest) (*UpdateBlobContainerResponse, error)
+	// Lists all blob storage containers
+	ListBlobContainers(context.Context, *ListBlobContainersRequest) (*ListBlobContainersResponse, error)
 	mustEmbedUnimplementedMyGreeterServer()
 }
 
@@ -233,6 +303,21 @@ func (UnimplementedMyGreeterServer) UpdateStorageAccount(context.Context, *Updat
 }
 func (UnimplementedMyGreeterServer) ListStorageAccounts(context.Context, *ListStorageAccountRequest) (*ListStorageAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListStorageAccounts not implemented")
+}
+func (UnimplementedMyGreeterServer) CreateBlobContainer(context.Context, *CreateBlobContainerRequest) (*CreateBlobContainerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBlobContainer not implemented")
+}
+func (UnimplementedMyGreeterServer) ReadBlobContainer(context.Context, *ReadBlobContainerRequest) (*ReadBlobContainerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadBlobContainer not implemented")
+}
+func (UnimplementedMyGreeterServer) DeleteBlobContainer(context.Context, *DeleteBlobContainerRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBlobContainer not implemented")
+}
+func (UnimplementedMyGreeterServer) UpdateBlobContainer(context.Context, *UpdateBlobContainerRequest) (*UpdateBlobContainerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBlobContainer not implemented")
+}
+func (UnimplementedMyGreeterServer) ListBlobContainers(context.Context, *ListBlobContainersRequest) (*ListBlobContainersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBlobContainers not implemented")
 }
 func (UnimplementedMyGreeterServer) mustEmbedUnimplementedMyGreeterServer() {}
 
@@ -385,118 +470,4 @@ func _MyGreeter_ReadStorageAccount_Handler(srv interface{}, ctx context.Context,
 		Server:     srv,
 		FullMethod: MyGreeter_ReadStorageAccount_FullMethodName,
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyGreeterServer).ReadStorageAccount(ctx, req.(*ReadStorageAccountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MyGreeter_DeleteStorageAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteStorageAccountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MyGreeterServer).DeleteStorageAccount(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: MyGreeter_DeleteStorageAccount_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyGreeterServer).DeleteStorageAccount(ctx, req.(*DeleteStorageAccountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MyGreeter_UpdateStorageAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateStorageAccountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MyGreeterServer).UpdateStorageAccount(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: MyGreeter_UpdateStorageAccount_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyGreeterServer).UpdateStorageAccount(ctx, req.(*UpdateStorageAccountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MyGreeter_ListStorageAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListStorageAccountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MyGreeterServer).ListStorageAccounts(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: MyGreeter_ListStorageAccounts_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyGreeterServer).ListStorageAccounts(ctx, req.(*ListStorageAccountRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// MyGreeter_ServiceDesc is the grpc.ServiceDesc for MyGreeter service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var MyGreeter_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "MyGreeter",
-	HandlerType: (*MyGreeterServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "SayHello",
-			Handler:    _MyGreeter_SayHello_Handler,
-		},
-		{
-			MethodName: "CreateResourceGroup",
-			Handler:    _MyGreeter_CreateResourceGroup_Handler,
-		},
-		{
-			MethodName: "ReadResourceGroup",
-			Handler:    _MyGreeter_ReadResourceGroup_Handler,
-		},
-		{
-			MethodName: "DeleteResourceGroup",
-			Handler:    _MyGreeter_DeleteResourceGroup_Handler,
-		},
-		{
-			MethodName: "UpdateResourceGroup",
-			Handler:    _MyGreeter_UpdateResourceGroup_Handler,
-		},
-		{
-			MethodName: "ListResourceGroups",
-			Handler:    _MyGreeter_ListResourceGroups_Handler,
-		},
-		{
-			MethodName: "CreateStorageAccount",
-			Handler:    _MyGreeter_CreateStorageAccount_Handler,
-		},
-		{
-			MethodName: "ReadStorageAccount",
-			Handler:    _MyGreeter_ReadStorageAccount_Handler,
-		},
-		{
-			MethodName: "DeleteStorageAccount",
-			Handler:    _MyGreeter_DeleteStorageAccount_Handler,
-		},
-		{
-			MethodName: "UpdateStorageAccount",
-			Handler:    _MyGreeter_UpdateStorageAccount_Handler,
-		},
-		{
-			MethodName: "ListStorageAccounts",
-			Handler:    _MyGreeter_ListStorageAccounts_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "api.proto",
-}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error)
