@@ -1,0 +1,99 @@
+{
+  "$schema": "https://ev2schema.azure.net/schemas/2020-04-01/RegionAgnosticRolloutSpecification.json",
+  "contentVersion": "1.0.0",
+  "rolloutMetadata": {
+    "serviceModelPath": "ServiceModel.json",
+    "scopeBindingsPath": "ScopeBinding.json",
+    "name": "Microsoft.Azure.Ev2.ServiceResources",
+    "buildSource": {
+      "parameters": {
+        "versionFile": "Version.txt"
+      }
+    },
+    "notification": {
+      "email": {
+        "to": "mheberling@microsoft.com"
+      }
+    },
+    "configuration": {
+      "serviceScope": {
+        "specPath": "Configuration.json"
+      }
+    }
+  },
+  "orchestratedSteps": [
+    {
+      "name": "PublishImageToAcr",
+      "targetType": "ServiceResourceDefinition",
+      "targetName": "PublishImageShellExtension-SRDef",
+      "actions": [
+        "Shell/push-image-to-acr"
+      ]
+    },
+    {
+      "name": "DeployServiceResources",
+      "targetType": "ServiceResourceDefinition",
+      "targetName": "azureSDKResources-SRDef",
+      "actions": [
+        "deploy"
+      ]
+    },
+    {
+      "name": "HelmDeploy-basicservice-client",
+      "targetType": "ApplicationDefinition",
+      "applications": {
+        "names": [
+          "basicserviceclient"
+        ],
+        "actions": [
+          "AppDeploy"
+        ],
+        "applyAcrossServiceResources": {
+          "definitionName": "basicserviceclient-SRDef"
+        }
+      },
+      "dependsOn": [
+        "DeployServiceResources",
+        "PublishImageToAcr"
+      ]
+    },
+    {
+      "name": "HelmDeploy-basicservice-server",
+      "targetType": "ApplicationDefinition",
+      "applications": {
+        "names": [
+          "basicserviceserver"
+        ],
+        "actions": [
+          "AppDeploy"
+        ],
+        "applyAcrossServiceResources": {
+          "definitionName": "basicserviceserver-SRDef"
+        }
+      },
+      "dependsOn": [
+        "DeployServiceResources",
+        "PublishImageToAcr"
+      ]
+    },
+    {
+      "name": "HelmDeploy-basicservice-demoserver",
+      "targetType": "ApplicationDefinition",
+      "applications": {
+        "names": [
+          "basicservicedemoserver"
+        ],
+        "actions": [
+          "AppDeploy"
+        ],
+        "applyAcrossServiceResources": {
+          "definitionName": "basicservicedemoserver-SRDef"
+        }
+      },
+      "dependsOn": [
+        "DeployServiceResources",
+        "PublishImageToAcr"
+      ]
+    }
+  ]
+}

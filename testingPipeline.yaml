@@ -1,0 +1,40 @@
+# Run a Bash script on macOS, Linux, or Windows
+variables:
+  - group: ADO_PAT
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: GoTool@0
+    displayName: Configure golang version
+    inputs:
+      version: "1.23.2" # Specify the desired Go version
+  - task: Bash@3
+    displayName: Configure git to use PAT
+    inputs:
+      targetType: "inline"
+      script: |
+        git config --global url."https://$(READPAT)@dev.azure.com/service-hub-flg/service_hub/_git/service_hub".insteadOf "https://dev.azure.com/service-hub-flg/service_hub/_git/service_hub"
+  - task: Bash@3
+    displayName: Test against canonical output
+    inputs:
+      targetType: "filePath"
+      filePath: testing/testOutput.sh
+      failOnStderr: false
+    env:
+      READPAT: $(READPAT)
+  - task: Bash@3
+    displayName: Test Coverage for Repo
+    inputs:
+      targetType: "filePath"
+      filePath: testing/testCoverageRepo.sh
+      failOnStderr: false
+    env:
+      StagingDir: $(Build.ArtifactStagingDirectory)/CoverageReports
+      threshold: 5
+  - task: PublishPipelineArtifact@1
+    displayName: Publish test coverage as an artifact
+    inputs:
+      targetPath: $(Build.ArtifactStagingDirectory)/CoverageReports
+      artifactName: TestCoverageHTMLs

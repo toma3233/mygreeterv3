@@ -1,0 +1,12 @@
+###################################
+# User inputs.
+###################################
+serviceInput:
+  # The directory name after destination_dir_prefix. It holds the service.
+  directoryName: README
+  # Whether to add this service to the umbrella pipeline
+  runPipeline: false
+  ################################
+  # The template name to use for this service.
+  # Only used by internal templating code to determine which template to use.
+  templateName: readmeTemplate

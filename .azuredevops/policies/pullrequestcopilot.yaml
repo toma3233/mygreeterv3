@@ -1,0 +1,233 @@
+name: copilot on pull request
+description: copilot on pull request
+
+# filters
+resource: repository
+
+# primitive configuration
+configuration:
+    # Semantic Kernel Configuration
+    skConfiguration:
+      version: 1.0
+      skills:
+        - marker: copilot
+          skillId: 1
+          skillCategory: generic
+          skillName: intent
+          intentSkill: true
+          userPrompt: [PullRequestComment]
+          semanticKernelConfig: >-
+            {
+              "schema": 1,
+              "description": "Determine the intent of user prompt(question).",
+              "type": "completion",
+              "completion": {
+                "max_tokens": 2000,
+                "temperature": 0.1,
+                "top_p": 0,
+                "presence_penalty": 0,
+                "frequency_penalty": 0
+              },
+              "input": {
+                "parameters": [
+                  {
+                    "name": "input",
+                    "description": "User provided prompt",
+                    "defaultValue": ""
+                  }      
+                ]
+              }
+            }
+          semanticKernelPrompt: >-
+           You are an intelligent AI assistant named copilot. A user is interacting with an AI chatbot on a pull request. 
+            Your job is to classify users intent from users prompt and decide which skills should be executed.
+            You can help map user's requests to skills ids.
+            You will only pick from the list of possible skills ids below to help decide the intent.
+            Read the list as "SkilldId","Description" 
+            "2","User wants to create a summary for a pull request"
+            "3","User wants to review the pull request. Or any other free text search that doesn't match any of the skills ids then you should pick skillId equals 3."
+            "4","User wants to find the size of the pull request, or to quantify it."
+            "5","User wants to suggest a fix for an MSAL issue."
+            "6","User wants to count the number of lines of code."
+            You will always respond in a Json.
+            // Begin Examples
+            // Begin Example 1
+            Question: pull request size or pull request quantifier, or pr size or pr quantifier or any sentence with size intent in.
+            [Output] 
+            {
+                "skillId": "2"
+            }
+            // End Example 1
+            // Begin Example 2
+            Question: count the number of lines of code or any query with the intent of counting in general the number of lines of code.
+            [Output] 
+            {
+                "skillId": "6"
+            }
+            // End Example 2
+            // End Examples
+            Question: {{$PullRequestComment}}
+            [Output]
+        - marker: copilot:prquantifier
+          skillId: 2
+          skillCategory: pullRequest
+          skillName: prquantifier
+          userPrompt: [PullRequestGitDiffPatch]
+          skillOutput: [CommentOnPullRequest]
+          semanticKernelConfig: >-
+            {
+                "schema": 1,
+                "description": "Quantify a pull request.Generate summary for the size of a pull request.",
+                "type": "completion",
+                "completion": {
+                "max_tokens": 1000,
+                "temperature": 0.5,
+                "top_p": 0,
+                "presence_penalty": 0,
+                "frequency_penalty": 0
+                },
+                "input": {
+                    "parameters": [
+                        {
+                        "name": "PullRequestGitDiffPatch",
+                        "description": "List of git patches",
+                        "defaultValue": ""
+                        }
+                    ]
+                }
+            }
+          semanticKernelPrompt: >-
+            You are an intelligent AI assistant that can help with programming related tasks. 
+                A pull request is a set of changes that are proposed to be merged into a code base. 
+                You can provide a size for a pull request by analyzing the changes in the pull request.
+                The patches provided are the changes in the pull request. 
+                The lines in the patch are prefixed with a character that indicates the type of change.
+                You will always respond in a one text line.
+                You will always respond in a csv.
+                The patches provided are the changes in the pull request. The lines in the patch are prefixed with a character that indicates the type of change.
+                + indicates an addition
+                - indicates a deletion
+                if line doesn't start with + or - indicates an unchanged line
+                // Begin Examples
+                // Begin Example 1
+                [Input]
+                PullRequestGitDiffPatch:
+                /src/Program.cs
+                - Console.WriteLine("Hello World");
+                + Console.WriteLine("Hello World!");
+                [Output]
+                "git changes + 1 -1"
+                // End Example 1
+                // Begin Example 2
+                PullRequestGitDiffPatch:
+                /src/Orchestrator.cs
+                            foreach (var comment: comments) 
+                            {
+                                var vssClient = await clientFactory.CreateAsync();
+                +                _ = await vssClient.CreateCommentAsync(comment);
+                -                await vssClient.CreateCommentAsync(comment);
+                            }
+                /src/VssClientFactory.cs
+                +           public IVSSClient CreateCommentAsync(Comment comment)
+                            {
+                                await this.CreateCommentInternalAsync(comment);
+                +                this._logger.LogInformation("Comment created");
+                            }
+                [Output]
+                "git changes + 3 -1"
+                // End Example 2
+                // End Examples
+                [Input]
+                PullRequestGitDiffPatch:
+                {{$PullRequestGitDiffPatch}}
+                [Output]
+        - marker: copilot:count lines of code
+          skillId: 6
+          skillCategory: pullRequest
+          skillName: countcodelines
+          userPrompt: [PullRequestFilesContent]
+          skillOutput: [CommentOnPullRequest]
+          semanticKernelConfig: >-
+            {
+                "schema": 1,
+                "description": "Count the number of lines of code excluding comments and empty lines.",
+                "type": "completion",
+                "completion": {
+                "max_tokens": 1000,
+                "temperature": 0.5,
+                "top_p": 0,
+                "presence_penalty": 0,
+                "frequency_penalty": 0
+                },
+                "input": {
+                    "parameters": [
+                        {
+                        "name": "PullRequestFilesContent",
+                        "description": "List of git files content after the changes",
+                        "defaultValue": ""
+                        }
+                    ]
+                }
+            }
+          semanticKernelPrompt: >-
+             You are an intelligent AI assistant that can help with programming related tasks. 
+                A pull request is a set of changes that are proposed to be merged into a code base.
+                You will parse the code and count the number of lines of code. You will exclude comments and empty lines.
+                comments will start with // or /// or /* and end with */.
+                empty lines are lines that have only white spaces or tabs.
+                // Begin Examples
+                // Begin Example 1
+                [Input]
+                /// <summary>
+                /// Registers an Hugging Face text embedding generation service with the specified configuration.
+                /// </summary>
+                /// <param name="builder">The <see cref="KernelBuilder"/> instance.</param>
+                /// <param name="model">The name of the Hugging Face model.</param>
+                /// <param name="endpoint">The endpoint for the text embedding generation service.</param>
+                /// <param name="serviceId">A local identifier for the given AI service.</param>
+                /// <param name="setAsDefault">Indicates whether the service should be the default for its type.</param>
+                /// <returns>The <see cref="KernelBuilder"/> instance.</returns>
+                public static KernelBuilder WithHuggingFaceTextEmbeddingGenerationService(this KernelBuilder builder,
+                    string model,
+                    string endpoint,
+                    string? serviceId = null,
+                    bool setAsDefault = false)
+                {
+                    builder.WithAIService<ITextEmbeddingGeneration>(serviceId, (parameters) =>
+                        new HuggingFaceTextEmbeddingGeneration(
+                            model,
+                            HttpClientProvider.GetHttpClient(parameters.Config, httpClient: null, parameters.Logger),
+                            endpoint),
+                            setAsDefault);
+
+                    return builder;
+                }
+                [Output]
+                14 lines of code
+                // End Example 1
+                // Begin Example 2
+                /// <summary>
+                /// Registers an Hugging Face text embedding generation service with the specified configuration.
+                /// </summary>
+                /// <param name="builder">The <see cref="KernelBuilder"/> instance.</param>
+                /// <param name="model">The name of the Hugfging Face model.</param>
+                /// <param name="endpoint">The endpoint for the text embedding generation service.</param>
+                /// <param name="serviceId">A local identifier for the given AI service.</param>
+                /// <param name="setAsDefault">Indicates whether the service should be the default for its type.</param>
+                /// <returns>The <see cref="KernelBuilder"/> instance.</returns>
+                public static KernelBuilder WithHuggingFaceTextEmbeddingGenerationService(this KernelBuilder builder,
+                    string model,
+                    string endpoint,
+                /*  string? serviceId = null,*/
+                    bool setAsDefault = false)
+                {
+                    //builder.WithAIService<ITextEmbeddingGeneration>(serviceId, (parameters) =>
+                        new HuggingFaceTextEmbeddingGeneration(
+                [Output]
+                6 lines of code
+                // End Example 2
+                // End Examples
+                [Input]
+                PullRequestFilesContent:
+                {{$PullRequestFilesContent}}
+                [Output]# documentation to semantic kernel and configuration data available out of the box.

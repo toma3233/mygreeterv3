@@ -1,0 +1,33 @@
+# (Prerequisite) To deploy the shared resources needed, go to the directory of the shared resources and run the Makefile.
+CURRENT_DIR := $(shell pwd)
+
+#Kube config must exist within server directory to be accessible in docker container when running helm commands
+connect-cluster:
+	az account set --subscription {{.subscriptionId}}
+	az aks get-credentials --resource-group <<.sharedInput.productShortName>>-{{.resourcesName}}-rg --name <<.sharedInput.productShortName>>-{{.resourcesName}}-cluster --file $(CURRENT_DIR)/.kube/config
+	if grep -qF -- "export KUBECONFIG=$(CURRENT_DIR)/.kube/config" ~/.bashrc; then \
+		echo 'KUBECONFIG exists in ~/.bashrc'; \
+	else \
+		echo 'KUBECONFIG does not exist in ~/.bashrc'; \
+		echo 'export KUBECONFIG=$(CURRENT_DIR)/.kube/config' >> ~/.bashrc; \
+	fi
+
+build-image:
+	set -e; \
+	<<- if contains .envInformation.goModuleNamePrefix "dev.azure.com">>
+	if [ -z "$(READPAT)" ]; then \
+		echo "READPAT does not exist. Please rerun the command with this variable"; \
+		exit 1; \
+	fi; \
+	docker build --build-arg PAT=$(READPAT) \
+	-t <<.sharedInput.productShortName>>{{.resourcesName}}{{.location}}acr.azurecr.io/<<.serviceInput.directoryName>> -f ../Dockerfile ./../; \
+	<<- else>>docker build --build-arg AKS_GOPROXY_TOKEN --build-arg GOPROXY --build-arg GOPRIVATE --build-arg GONOPROXY \
+	-t <<.sharedInput.productShortName>>{{.resourcesName}}{{.location}}acr.azurecr.io/<<.serviceInput.directoryName>> -f ../Dockerfile ./../; \<<end>>
+	docker save -o <<.serviceInput.directoryName>>-image.tar <<.sharedInput.productShortName>>{{.resourcesName}}{{.location}}acr.azurecr.io/<<.serviceInput.directoryName>>; \
+
+push-image:
+	set -e; \
+	az acr login --name <<.sharedInput.productShortName>>{{.resourcesName}}{{.location}}acr.azurecr.io; \
+	docker load -i <<.serviceInput.directoryName>>-image.tar; \
+	docker push <<.sharedInput.productShortName>>{{.resourcesName}}{{.location}}acr.azurecr.io/<<.serviceInput.directoryName>>; \
+	rm <<.serviceInput.directoryName>>-image.tar;

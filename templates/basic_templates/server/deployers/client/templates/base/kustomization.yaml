@@ -1,0 +1,7 @@
+resources:
+  - acr_pull_binding.yaml
+  - deployment.yaml
+  - service_account.yaml
+
+commonAnnotations:
+  aks.component/sig: service-hub

@@ -1,0 +1,149 @@
+{
+  "$schema": "https://ev2schema.azure.net/schemas/2020-04-01/RegionAgnosticServiceModel.json",
+  "contentVersion": "1.0.0",
+  "serviceMetadata": {
+    "serviceIdentifier": "<<.resourceInput.serviceTreeId>>",
+    "serviceGroup": "Microsoft.Azure.Ev2.ServiceResources.<<.serviceInput.directoryName>>",
+    "environment": "$config(environment)",
+    "TenantId": "$config(tenantId)",
+    "displayName": "<<.serviceInput.directoryName>>DisplayName"
+  },
+  "serviceResourceGroupDefinitions": [
+    {
+      "name": "<<.serviceInput.directoryName>>-SRGDef",
+      "subscriptionKey": "<<.sharedInput.productShortName>>-$config(regionShortName)-sub",
+      "azureResourceGroupName": "<<.sharedInput.productShortName>>-<<.resourceInput.ev2ResourcesName>>-$config(regionShortName)-rg",
+      "ServiceResourceDefinitions": [
+        {
+          "name": "azureSDKResources-SRDef",
+          "composedOf": {
+            "arm": {
+              "templatePath": "Templates\\Azuresdk.ServiceResources.Template.json",
+              "parametersPath": "Parameters\\ServiceResources.Parameters.json",
+              "deploymentLevel": "Subscription"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            }
+          ]
+        },
+        {
+          "name": "<<.serviceInput.directoryName>>client-SRDef",
+          "composedOf": {
+            "application": {
+              "names": [
+                "<<.serviceInput.directoryName>>client"
+              ]
+            },
+            "extension": {
+              "rolloutParametersPath": "Parameters\\Helm.Rollout.Parameters.json"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            },
+            {
+              "name": "HelmInputs"
+            }
+          ]
+        },
+        {
+          "name": "<<.serviceInput.directoryName>>server-SRDef",
+          "composedOf": {
+            "application": {
+              "names": [
+                "<<.serviceInput.directoryName>>server"
+              ]
+            },
+            "extension": {
+              "rolloutParametersPath": "Parameters\\Helm.Rollout.Parameters.json"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            },
+            {
+              "name": "HelmInputs"
+            }
+          ]
+        },
+        {
+          "name": "PublishImageShellExtension-SRDef",
+          "composedOf": {
+            "extension": {
+              "rolloutParametersPath": "Parameters\\PublishImage.Parameters.json",
+              "shell": [
+                {
+                  "type": "push-image-to-acr",
+                  "properties": {
+                    "imageName": "adm-ubuntu-2004-l",
+                    "imageVersion": "v5"
+                  }
+                }
+              ]
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ApplicationDefinitions": [
+    {
+      "name": "<<.serviceInput.directoryName>>client",
+      "rollbackOnFailure": false,
+      "azureKubernetesService": {
+        "releaseName": "<<.serviceInput.directoryName>>-client",
+        "chart": {
+          "reference": {
+            "path": "Build\\<<.serviceInput.directoryName>>-0.1.0.tgz"
+          }
+        },
+        "tools": {
+          "helm": {
+            "version": "3.11",
+            "arguments": {
+              "timeout": "PT30M"
+            }
+          }
+        },
+        "valuesPaths": [
+          "Build\\values-common.yaml",
+          "Build\\values-client.yaml"
+        ]
+      }
+    },
+    {
+      "name": "<<.serviceInput.directoryName>>server",
+      "rollbackOnFailure": false,
+      "azureKubernetesService": {
+        "releaseName": "<<.serviceInput.directoryName>>-server",
+        "chart": {
+          "reference": {
+            "path": "Build\\<<.serviceInput.directoryName>>-0.1.0.tgz"
+          }
+        },
+        "tools": {
+          "helm": {
+            "version": "3.11",
+            "arguments": {
+              "timeout": "PT30M"
+            }
+          }
+        },
+        "valuesPaths": [
+          "Build\\values-common.yaml",
+          "Build\\values-server.yaml"
+        ]
+      }
+    }
+  ]
+}

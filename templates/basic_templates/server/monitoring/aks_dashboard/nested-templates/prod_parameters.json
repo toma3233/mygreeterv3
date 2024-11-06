@@ -1,0 +1,166 @@
+{
+    "kind": "duration",
+    "id": "ce6dd3c7-bd48-45c5-818e-5401c5ff43b2",
+    "displayName": "Time range",
+    "description": "Select the time range you wish to examine.",
+    "beginVariableName": "_startTime",
+    "endVariableName": "_endTime",
+    "defaultValue": {
+        "kind": "dynamic",
+        "count": 1,
+        "unit": "hours"
+    },
+    "showOnPages": {
+        "kind": "all"
+    }
+},
+{
+    "kind": "dataSource",
+    "id": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92",
+    "displayName": "_database",
+    "description": "Select the database you wish to query your data from.",
+    "defaultValue": {
+        "kind": "dataSource",
+        "dataSourceId": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77"
+    },
+    "dataSource": {
+        "kind": "dataSource",
+        "values": {
+            "kind": "all"
+        }
+    },
+    "showOnPages": {
+        "kind": "all"
+    }
+},
+{
+    "kind": "string",
+    "id": "4994936e-55ba-447b-8b89-f5fa4704fd68",
+    "displayName": "_environment",
+    "description": "Select the environment from which we retrieve logs to generate the dashboard.",
+    "variableName": "_environment",
+    "selectionType": "scalar",
+    "includeAllOption": false,
+    "defaultValue": {
+        "kind": "query-result"
+    },
+    "dataSource": {
+        "kind": "query",
+        "columns": {
+            "value": "Environment",
+            "label": "Environment"
+        },
+        "queryRef": {
+            "kind": "query",
+            "queryId": "d2c48065-db1d-467e-a2f4-7b1b66fb9071"
+        }
+    },
+    "showOnPages": {
+        "kind": "all"
+    }
+},
+{
+    "kind": "string",
+    "id": "17426b93-e6cf-46b3-9c36-bbf6c660fb20",
+    "displayName": "_rptenant",
+    "description": "Select the RPTenant, or region, from which we retrieve logs to generate the dashboard.",
+    "variableName": "_rptenant",
+    "selectionType": "scalar",
+    "includeAllOption": false,
+    "defaultValue": {
+        "kind": "query-result"
+    },
+    "dataSource": {
+        "kind": "query",
+        "columns": {
+            "value": "RPTenant",
+            "label": "RPTenant"
+        },
+        "queryRef": {
+            "kind": "query",
+            "queryId": "16e956e9-28f3-41f5-b0cd-88609133aa59"
+        }
+    },
+    "showOnPages": {
+        "kind": "all"
+    }
+},
+{
+    "kind": "string",
+    "id": "c418aadf-d4c0-47b7-9c21-5b12e8653ff6",
+    "displayName": "_container",
+    "description": "Select the source container from which we retrieve logs to generate the dashboard.",
+    "variableName": "_container",
+    "selectionType": "scalar",
+    "includeAllOption": false,
+    "defaultValue": {
+        "kind": "query-result"
+    },
+    "dataSource": {
+        "kind": "query",
+        "columns": {
+            "value": "container",
+            "label": "container"
+        },
+        "queryRef": {
+            "kind": "query",
+            "queryId": "d6f70dc3-7b47-4af6-a3f7-98486effc43b"
+        }
+    },
+    "showOnPages": {
+        "kind": "all"
+    }
+},
+{
+    "kind": "string",
+    "id": "3f03d795-823e-41ac-bc09-9c575436ce8c",
+    "displayName": "_component",
+    "description": "Select whether to examine the outgoing client requests from the container or focus on the incoming server requests.",
+    "variableName": "_component",
+    "selectionType": "scalar",
+    "includeAllOption": false,
+    "defaultValue": {
+        "kind": "query-result"
+    },
+    "dataSource": {
+        "kind": "query",
+        "columns": {
+            "value": "component"
+        },
+        "queryRef": {
+            "kind": "query",
+            "queryId": "b9413d5a-daf4-4e28-89eb-ac9659ff0f39"
+        }
+    },
+    "showOnPages": {
+        "kind": "all"
+    }
+},
+{
+    "kind": "string",
+    "id": "23d394a2-a04f-4e15-a04a-9262c5668408",
+    "displayName": "_method",
+    "description": "Select which method the dashboard will filter on.",
+    "variableName": "_method",
+    "selectionType": "scalar",
+    "includeAllOption": false,
+    "defaultValue": {
+        "kind": "query-result"
+    },
+    "dataSource": {
+        "kind": "query",
+        "columns": {
+            "value": "method"
+        },
+        "queryRef": {
+            "kind": "query",
+            "queryId": "e170a030-4cfc-4381-9ae5-fc12ccdf2027"
+        }
+    },
+    "showOnPages": {
+        "kind": "selection",
+        "pageIds": [
+            "0c7d1052-237a-4600-8cda-b45b91e5c3e5"
+        ]
+    }
+}

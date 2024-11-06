@@ -1,0 +1,72 @@
+# This deployment contains the configuration information for the HEAD
+# binary of the container service.
+#
+# When a particular release is cut, this file is branched into that release
+# and will be used for production rollouts.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicehub-<<.serviceInput.directoryName>>-demoserver
+  namespace: (V_NAMESPACE)
+spec:
+  revisionHistoryLimit: 10
+  replicas: "(V_REPLICAS)"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: <<.serviceInput.directoryName>>-demoserver
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: (V_API_LINKERD)
+        aks.prometheus.io/scrape: "true"
+        aks.prometheus.io/port: "9091"
+        adx-mon/scrape: "true"
+        adx-mon/port: "9091"
+        adx-mon/path: "/metrics"
+      labels:
+        app: <<.serviceInput.directoryName>>-demoserver
+        kubernetes.azure.com/mdsd-source.ApiRequestLog: mdsd.apirequestlog
+        kubernetes.azure.com/mdsd-source.CtxLog: mdsd.ctxlog
+    spec:
+      serviceAccount: <<.serviceInput.directoryName>>-demoserver-sa
+      terminationGracePeriodSeconds: 90
+      containers:
+        - name: servicehub-<<.serviceInput.directoryName>>-demoserver
+          image: "(V_ACR_SERVER)/(V_IMAGE_ORG)/<<.serviceInput.directoryName>>-demoserver(V_IMAGE_FINAL_TAG)"
+          imagePullPolicy: (V_IMAGE_PULL_POLICY)
+          command:
+            - /<<.serviceInput.directoryName>>-demoserver
+          args:
+            - start
+            - --port=50171
+            - --json-log
+          env:
+            - name: DEPLOY_ENV
+              value: (V_DEPLOY_ENV)
+            - name: CLOUD_ENVIRONMENT
+              value: (V_CLOUD_ENVIRONMENT)
+            - name: GODEBUG
+              value: (V_GODEBUG)
+            - name: AKS_BIN_VERSION_VERSION
+              value: "(V_AKS_BIN_VERSION_VERSION)"
+            - name: AKS_BIN_VERSION_GITBRANCH
+              value: "(V_AKS_BIN_VERSION_GITBRANCH)"
+            - name: AKS_BIN_VERSION_GITHASH
+              value: "(V_AKS_BIN_VERSION_GITHASH)"
+            - name: AKS_BIN_VERSION_BUILDTIME
+              value: "(V_AKS_BIN_VERSION_BUILDTIME)"
+            - name: GOSHUTTLE_LOG
+              value: "(V_ENABLE_GOSHUTTLE_LOG)"
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1000
+      imagePullSecrets:
+        - name: (V_IMAGE_PULL_SECRET_NAME)

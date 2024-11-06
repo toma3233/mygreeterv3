@@ -1,0 +1,157 @@
+# Run a Bash script on macOS, Linux, or Windows
+jobs:
+  - job: <<.serviceInput.directoryName>>TestCoverage
+    displayName: "[<<.serviceInput.directoryName>>] Generate test coverage reports"
+    pool:
+      vmImage: "ubuntu-latest"
+    steps:
+      - task: GoTool@0
+        inputs:
+          version: '1.23.2'
+      - task: Bash@3
+        displayName: Test Suite Check
+        inputs:
+          targetType: "filePath"
+          filePath: <<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/test/testSuites.sh
+          failOnStderr: false
+      - task: Bash@3
+        displayName: Test Coverage for Output
+        inputs:
+          targetType: "filePath"
+          filePath: <<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/test/testCoverageOutput.sh
+          failOnStderr: false
+        env:
+          threshold: 5
+          <<- if contains .envInformation.goModuleNamePrefix "dev.azure.com">>
+          READPAT: $(READPAT)
+          <<- else>>
+          AKS_GOPROXY_TOKEN: $(AKS_GOPROXY_TOKEN)
+          GOPROXY: $(GOPROXY)
+          GOPRIVATE: $(GOPRIVATE)
+          GONOPROXY: $(GONOPROXY)<<end>>
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish test coverage as an artifact"
+        inputs:
+          targetPath: "<<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/test/coverage_reports"
+          artifactName: <<.serviceInput.directoryName>>_CoverageReports
+  - job: <<.serviceInput.directoryName>>BuildImage
+    displayName: "[<<.serviceInput.directoryName>>] Build image"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - GenerateAndPublishEnvConfig
+    steps:
+      - template: ../<<.pipelineInput.directoryName>>/downloadRequirements.yaml
+      #TODO: Change this to split build and push, when build option is available instead of buildx.
+      - task: Bash@3
+        displayName: Build image
+        inputs:
+          targetType: "filePath"
+          filePath: <<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/test/buildImage.sh
+          failOnStderr: false
+        env:
+          <<- if contains .envInformation.goModuleNamePrefix "dev.azure.com">>
+          READPAT: $(READPAT)
+          <<- else>>
+          AKS_GOPROXY_TOKEN: $(AKS_GOPROXY_TOKEN)
+          GOPROXY: $(GOPROXY)
+          GOPRIVATE: $(GOPRIVATE)
+          GONOPROXY: $(GONOPROXY)<<end>>
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish docker image as an artifact"
+        inputs:
+          targetPath: "<<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/generated/<<.serviceInput.directoryName>>-image.tar"
+          artifactName: <<.serviceInput.directoryName>>-image
+  - job: <<.serviceInput.directoryName>>PushImage
+    displayName: "[<<.serviceInput.directoryName>>] Push image"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - ProvisionSharedResources
+      - <<.serviceInput.directoryName>>BuildImage
+    steps:
+      - template: ../<<.pipelineInput.directoryName>>/downloadRequirements.yaml
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download docker image artifact"
+        inputs:
+          artifactName: <<.serviceInput.directoryName>>-image
+          targetPath: "$(System.DefaultWorkingDirectory)/<<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/generated/"
+      - task: AzureCLI@2
+        displayName: Push image
+        inputs:
+          # azureSubscription corresponds to the name of the azure resource manager service
+          # connection that is supposed to be used for the pipeline task.
+          azureSubscription: <<.envInformation.serviceConnectionName>>
+          scriptType: "bash"
+          scriptLocation: "scriptPath"
+          scriptPath: <<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/test/pushImage.sh
+  - job: <<.serviceInput.directoryName>>ProvisionServiceResources
+    displayName: "[<<.serviceInput.directoryName>>] Provision service specific resources"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - ProvisionSharedResources
+    steps:
+      - template: ../<<.pipelineInput.directoryName>>/downloadRequirements.yaml
+      - task: AzureCLI@2
+        displayName: Provision service specific resources
+        inputs:
+          # azureSubscription corresponds to the name of the azure resource manager service
+          # connection that is supposed to be used for the pipeline task.
+          azureSubscription: <<.envInformation.serviceConnectionName>>
+          scriptType: "bash"
+          scriptLocation: "scriptPath"
+          scriptPath: <<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/test/provisionServiceResources.sh
+          # If we re-add make service into deploy-resources, these arguments will 
+          # be needed for pipeline to successfully access the private repository.
+          <<- if contains .envInformation.goModuleNamePrefix "dev.azure.com">>
+          # arguments: $(READPAT)
+          <<- else>>
+          # arguments: $(AKS_GOPROXY_TOKEN) $(GOPROXY) $(GOPRIVATE) $(GONOPROXY)<<end>>
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish artifact directory"
+        inputs:
+          targetPath: "<<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/artifacts"
+          artifactName: <<.serviceInput.directoryName>>_ArtifactDirectory
+      - task: Bash@3
+        displayName: Prepare all markdown files to publish
+        inputs:
+          targetType: "inline"
+          script: |
+            cd <<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server
+            mkdir markdown_files
+            if ls resources/**/*.md 1> /dev/null 2>&1; then
+              find resources -name "*.md" -not -name "ai-summary.md" -exec mv {} markdown_files \;
+            fi
+          failOnStderr: false
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish service specific resource markdown files"
+        inputs:
+          targetPath: "<<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/markdown_files"
+          artifactName: <<.serviceInput.directoryName>>_SpecificResourceMarkdownFiles
+  - job: <<.serviceInput.directoryName>>DeployService
+    displayName: "[<<.serviceInput.directoryName>>] Deploy Service"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      - <<.serviceInput.directoryName>>PushImage
+      - <<.serviceInput.directoryName>>ProvisionServiceResources
+    steps:
+      - template: ../<<.pipelineInput.directoryName>>/downloadRequirements.yaml
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download artifact directory"
+        inputs:
+          artifactName: <<.serviceInput.directoryName>>_ArtifactDirectory
+          targetPath: "$(System.DefaultWorkingDirectory)/<<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/artifacts"
+      - task: AzureCLI@2
+        displayName: Deploy and test service
+        inputs:
+          # azureSubscription corresponds to the name of the azure resource manager service
+          # connection that is supposed to be used for the pipeline task.
+          azureSubscription: <<.envInformation.serviceConnectionName>>
+          scriptType: "bash"
+          scriptLocation: "scriptPath"
+          scriptPath: <<.sharedInput.directoryPath>><<.serviceInput.directoryName>>/server/test/deployService.sh

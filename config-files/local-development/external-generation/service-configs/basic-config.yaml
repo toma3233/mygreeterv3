@@ -1,0 +1,16 @@
+###################################
+# User inputs.
+###################################
+serviceInput:
+  # The directory name after destination_dir_prefix. It holds the service.
+  directoryName: basicservice
+  # The service name in the protobuf.
+  serviceName: BasicService
+  # Whether to add this service to the umbrella pipeline
+  runPipeline: true
+  # The primary email address for the service. This is for Ev2 notifications.
+  contactEmail: mheberling@microsoft.com
+  ################################
+  # The template name to use for this service.
+  # Only used by internal templating code to determine which template to use.
+  templateName: basicGoTemplate

@@ -1,0 +1,25 @@
+## The following are operators currently available for use
+
+# The "upper" operator replaces the variable name with the provided variable but capitalizes all the letters of the value.
+example => <<.ServiceInput.DirectoryName|upper>>_CLIENT_IMAGE_DIGEST} = MYGREETERV2_CLIENT_IMAGE_DIGEST
+
+# The "contains" operator checks if a string contains another string.
+example => <<- if (contains .envInformation.goModuleNamePrefix "go.goms.io")>> 
+
+
+# The "trimGitSuffix" operator removes all leading and trailing white spaces from a string.
+example => <<- .envInformation.goModuleNamePrefix|trimGitSuffix>> 
+.envInformation.goModuleNamePrefix = dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output
+Output = dev.azure.com/service-hub-flg/service_hub/_git/service_hub
+
+# The "apiModule" operator combines the goModuleNamePrefix with the service directory name and "api"
+example <<apiModule .envInformation.goModuleNamePrefix .serviceInput.directoryName>>
+.envInformation.goModuleNamePrefix = dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output
+.ServiceInput.DirectoryName = mygreeterv3
+Output = dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/api
+
+# The "serverModule" operator combines the goModuleNamePrefix with the service directory name and "server"
+example <<serverModule .envInformation.goModuleNamePrefix .serviceInput.directoryName>>
+.envInformation.goModuleNamePrefix = dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output
+.ServiceInput.DirectoryName = mygreeterv3
+Output = dev.azure.com/service-hub-flg/service_hub/_git/service_hub.git/testing/canonical-output/mygreeterv3/server

@@ -1,0 +1,31 @@
+# Run a Bash script on macOS, Linux, or Windows
+steps:
+  - task: AzureCLI@2
+    displayName: Deploy shared resources
+    inputs:
+      azureSubscription: ServiceHubServiceConnection
+      scriptType: "bash"
+      scriptLocation: "scriptPath" # 'inlineScript' | 'scriptPath'. Required. Script Location. Default: scriptPath.
+      #TODO: currently folder name is hard-coded, however in the future we should template this
+      #by seperating destination dir to destination dir prefix and shared resources folder name
+      #in resources-config.yaml
+      scriptPath: testing/canonical-output/shared-resources/provisionSharedResources.sh # string. Required when scriptLocation = scriptPath. Script Path.
+  - task: Bash@3
+    displayName: Log resource group link
+    inputs:
+      targetType: "inline"
+      script: |
+        cd testing/canonical-output/shared-resources
+        if [ -f ".shared-resources_output.json" ]; then
+          resourceGroupId=$(jq -r '.properties.outputResources[].id | split("/") | select(.[length-2] == "resourceGroups") | join("/")' .shared-resources_output.json)
+          resourceGroupLink=https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource${resourceGroupId}
+          echo "##vso[task.logissue type=warning]Your resources exist in the following resource group: ${resourceGroupLink}"
+        else
+            exit 1
+        fi
+      failOnStderr: false
+  - task: PublishPipelineArtifact@1
+    displayName: Publish shared resource markdown files
+    inputs:
+      targetPath: testing/canonical-output/shared-resources/shared-resources_resources.md
+      artifactName: SharedResourcesMarkdownFiles

@@ -1,0 +1,7 @@
+# For the user environment this file would be automatically generated, by the script
+# that creates the user environment (extracting the value from terraform output) however
+# for our development and testing it is manually generated as there is no terraform resources
+# to extract the output from.
+envInformation:
+  # To generate a service for AKS and our internal development, the `goModuleNamePrefix` has to be `go.goms.io/aks/rp`
+  goModuleNamePrefix: go.goms.io/aks/rp

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ev2schema.azure.net/schemas/2020-01-01/rolloutParameters.json",
+  "contentVersion": "1.0.0.0",
+  "extensions": [
+    {
+      "name": "ResourceProviderExtension",
+      "type": "Microsoft.AzureGlobal/ResourceProviderRegistration",
+      "version": "2019-04-01",
+      "connectionProperties": {
+        "maxExecutionTime": "PT24H",
+        "authentication": {
+          "type": "SystemCertificateAuthentication"
+        }
+      },
+      "payloadProperties": {
+        "waitUntilComplete": {
+          "value": true
+        },
+        "resourceProviderNamespaces": {
+          "value": [
+            "Microsoft.Compute"
+          ]
+        }
+      }
+    }
+  ]
+}

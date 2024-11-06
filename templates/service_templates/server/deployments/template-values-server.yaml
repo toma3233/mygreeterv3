@@ -1,0 +1,44 @@
+# Default values for server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: <<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>-server
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations:
+    azure.workload.identity/client-id: __AZURESDK_WORKLOAD_IDENTITY_CLIENT_ID__ # in make file, generate another file that will replace client id
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+command:
+  - /server
+
+args:
+  - start
+  - --json-log
+  - --remote-addr=<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>-demoserver.<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>-demoserver:50071
+  - --enable-azureSDK-calls=true
+  - --subscription-id={{.subscriptionId}}
+  - --service-bus-hostname=<<.sharedInput.productShortName>>-{{.resourcesName}}-servicebus-namespace.servicebus.windows.net
+  - --service-bus-queue-name=<<.sharedInput.productShortName>>-{{.resourcesName}}-queue
+
+# Info used for authorization policy
+allowedPrincipals:
+  - cluster.local/ns/<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>-client/sa/<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>-client
+
+allowedRequests:
+  - /MyGreeter/SayHello
+  - /MyGreeter/CreateResourceGroup
+  - /MyGreeter/ReadResourceGroup
+  - /MyGreeter/UpdateResourceGroup
+  - /MyGreeter/ListResourceGroups
+  - /MyGreeter/DeleteResourceGroup
+  - /MyGreeter/StartLongRunningOperation
+  - /v1/hello
+  - /v1/resourcegroups/*
+  - /v1/resourcegroups

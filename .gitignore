@@ -1,0 +1,15 @@
+fanglu_temp
+testing/generated-output
+go-templating/.coverage-report.out
+testing/CoverageReports
+user-environment/generated-output
+user-environment/terraform-files/terraform.tfstate
+user-environment/terraform-files/terraform.tfstate.backup
+user-environment/terraform-files/.terraform.lock.hcl
+user-environment/terraform-files/.terraform
+env-config.yaml
+testing/canonical-output/basicservice/.coverage-report.out
+testing/canonical-output/basicservice/server/test/coverage_reports
+testing/canonical-output/mygreeterv3/.coverage-report.out
+testing/canonical-output/mygreeterv3/server/test/coverage_reports
+.aider*

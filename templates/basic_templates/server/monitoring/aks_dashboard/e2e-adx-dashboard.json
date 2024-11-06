@@ -1,0 +1,62 @@
+{
+    "$schema": "https://dataexplorer.azure.com/static/d/schema/51/dashboard.json",
+    "id": "3303e636-d213-4452-a5f9-b752f952f5b4",
+    "eTag": "359b71a0-7d30-41b1-8ed9-ffc3db3b66a3",
+    "schema_version": "51",
+    "title": "e2e Internal <<.serviceInput.directoryName>> Dashboard",
+    "autoRefresh": {
+        "enabled": true,
+        "defaultInterval": "30m",
+        "minInterval": "5m"
+    },
+    "baseQueries": [
+        <<template "base_queries.json" . >>
+    ],
+    "queries": [
+
+    {
+        "id": "b5d22ee5-8297-4adf-ab56-404c2f7158fa",
+        "dataSource": {
+            "kind": "parameter",
+            "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+        },
+        "text": "ApiRequestLog\n| where PreciseTimeStamp between (_startTime.._endTime)\n| where msg == \"finished call\"\n| where namespace in (\"<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>\")",
+        "usedVariables": [
+            "_endTime",
+            "_startTime"
+        ]
+    },
+    {
+        "id": "1e39e591-61ea-4f3d-bc8e-4b4038e5cc3e",
+        "dataSource": {
+            "kind": "parameter",
+            "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+        },
+        "text": "ApiRequestLog\n| where PreciseTimeStamp between (_startTime.._endTime)\n| where msg == \"finished call\"\n| where namespace in (\"<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>\")",
+        "usedVariables": [
+            "_endTime",
+            "_startTime"
+        ]
+    },
+        <<template "e2e_queries.json" . >>
+    ],
+    "tiles": [
+        <<template "tiles.json" . >>
+    ],
+    "parameters": [
+        <<template "e2e_parameters.json" . >>
+    ],
+    "dataSources": [
+        {
+            "id": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "name": "aks e2e",
+            "clusterUri": "https://akse2e.westus2.kusto.windows.net/",
+            "database": "AKSE2EVstsPipelineStatus",
+            "kind": "manual-kusto",
+            "scopeId": "kusto"
+        }
+    ],
+    "pages": [
+        <<template "pages.json" . >>
+    ]
+}

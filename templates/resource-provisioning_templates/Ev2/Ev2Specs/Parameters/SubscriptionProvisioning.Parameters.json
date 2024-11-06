@@ -1,0 +1,24 @@
+{
+    "$schema": "https://ev2schema.azure.net/schemas/2020-01-01/rolloutParameters.json",
+    "contentVersion": "1.0.0.0",
+    "subscriptions": [
+        {
+            "name": "SubscriptionProvisioning",
+            "displayName": "<<.sharedInput.productDisplayName>> Sub - {{.location}}",
+            "workload": "DevTest",
+            "billing": {
+                // The part of the scope string that is hardcoded is a pre-established constant for all clouds. It was provided in Ev2 docs.
+                "scope": "/billingAccounts/3984c6f4-2d2a-4b04-93ce-43cf4824b698:c2ff2d7c-162e-4c31-b715-1405de6d9cf3_2019-05-31/billingProfiles/{{.secondLevelServiceTreeNodeId}}/invoiceSections/{{.serviceTreeId}}",
+                "pcCode": "{{.pcCode}}",
+                "costCategory": "{{.costCategory}}",
+                "airsRegisteredUserPrincipalId": "{{.airsRegisteredUserPrincipalId}}",
+                "airsRegisteredUserTenantId": "{{.tenantId}}"
+            },
+            "roleAssignment": {
+                "armTemplatePath": "Templates\\RoleAssignment.Subscription.Template.json",
+                "armParametersPath": "Parameters\\RoleAssignment.Subscription.Parameters.json"
+            },
+            "isServiceScope": "true"
+        }
+    ]
+}

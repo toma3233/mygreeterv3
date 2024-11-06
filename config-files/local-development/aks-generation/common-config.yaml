@@ -1,0 +1,16 @@
+######################################################################
+######################################################################
+# User inputs.
+######################################################################
+######################################################################
+sharedInput:
+  # # The following are variables used when generating resources and pipeline modules.
+  # A directory on your computer where the shared resources and pipeline folders will be stored.
+  destinationDirPrefix: ~/projects/aks-rp
+  # Absolute path used for pipeline and script files.
+  # Only relevant for service hub testing.
+  directoryPath: ""
+  # The official display name of your product.
+  productDisplayName: AKS Service Hub
+  # The official short name (only lowercase letters) of your product.
+  productShortName: servicehub

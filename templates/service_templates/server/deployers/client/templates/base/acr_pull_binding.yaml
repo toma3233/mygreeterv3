@@ -1,0 +1,8 @@
+apiVersion: msi-acrpull.microsoft.com/v1beta1
+kind: AcrPullBinding
+metadata:
+  name: apb
+  namespace: (V_NAMESPACE)
+spec:
+  acrServer: (V_ACR_SERVER)
+  managedIdentityResourceID: (V_ACR_MSI_ResourceID)

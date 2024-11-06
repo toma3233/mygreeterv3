@@ -1,0 +1,139 @@
+# Run a Bash script on macOS, Linux, or Windows
+jobs:
+  - job: basicserviceTestCoverage
+    displayName: "[basicservice] Generate test coverage reports"
+    pool:
+      vmImage: "ubuntu-latest"
+    steps:
+      - task: Bash@3
+        displayName: Test Suite Check
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/basicservice/server/test/testSuites.sh
+          failOnStderr: false
+      - task: Bash@3
+        displayName: Test Coverage for Output
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/basicservice/server/test/testCoverageOutput.sh
+          failOnStderr: false
+        env:
+          threshold: 5
+          READPAT: $(READPAT)
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish test coverage as an artifact"
+        inputs:
+          targetPath: "testing/canonical-output/basicservice/server/test/coverage_reports"
+          artifactName: basicservice_CoverageReports
+  - job: basicserviceBuildImage
+    displayName: "[basicservice] Build image"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - GenerateAndPublishEnvConfig
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      #TODO: Change this to split build and push, when build option is available instead of buildx.
+      - task: Bash@3
+        displayName: Build image
+        inputs:
+          targetType: "filePath"
+          filePath: testing/canonical-output/basicservice/server/test/buildImage.sh
+          failOnStderr: false
+        env:
+          READPAT: $(READPAT)
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish docker image as an artifact"
+        inputs:
+          targetPath: "testing/canonical-output/basicservice/server/generated/basicservice-image.tar"
+          artifactName: basicservice-image
+  - job: basicservicePushImage
+    displayName: "[basicservice] Push image"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - ProvisionSharedResources
+      - basicserviceBuildImage
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download docker image artifact"
+        inputs:
+          artifactName: basicservice-image
+          targetPath: "$(System.DefaultWorkingDirectory)/testing/canonical-output/basicservice/server/generated/"
+      - task: AzureCLI@2
+        displayName: Push image
+        inputs:
+          # azureSubscription corresponds to the name of the azure resource manager service
+          # connection that is supposed to be used for the pipeline task.
+          azureSubscription: ServiceHubServiceConnection
+          scriptType: "bash"
+          scriptLocation: "scriptPath"
+          scriptPath: testing/canonical-output/basicservice/server/test/pushImage.sh
+  - job: basicserviceProvisionServiceResources
+    displayName: "[basicservice] Provision service specific resources"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      #This job is mentioned in main pipeline yaml file (within pipeline files directory)
+      - ProvisionSharedResources
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      - task: AzureCLI@2
+        displayName: Provision service specific resources
+        inputs:
+          # azureSubscription corresponds to the name of the azure resource manager service
+          # connection that is supposed to be used for the pipeline task.
+          azureSubscription: ServiceHubServiceConnection
+          scriptType: "bash"
+          scriptLocation: "scriptPath"
+          scriptPath: testing/canonical-output/basicservice/server/test/provisionServiceResources.sh
+          # If we re-add make service into deploy-resources, these arguments will 
+          # be needed for pipeline to successfully access the private repository.
+          # arguments: $(READPAT)
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish artifact directory"
+        inputs:
+          targetPath: "testing/canonical-output/basicservice/server/artifacts"
+          artifactName: basicservice_ArtifactDirectory
+      - task: Bash@3
+        displayName: Prepare all markdown files to publish
+        inputs:
+          targetType: "inline"
+          script: |
+            cd testing/canonical-output/basicservice/server
+            mkdir markdown_files
+            if ls resources/**/*.md 1> /dev/null 2>&1; then
+              find resources -name "*.md" -not -name "ai-summary.md" -exec mv {} markdown_files \;
+            fi
+          failOnStderr: false
+      - task: PublishPipelineArtifact@1
+        displayName: "Publish service specific resource markdown files"
+        inputs:
+          targetPath: "testing/canonical-output/basicservice/server/markdown_files"
+          artifactName: basicservice_SpecificResourceMarkdownFiles
+  - job: basicserviceDeployService
+    displayName: "[basicservice] Deploy Service"
+    pool:
+      vmImage: "ubuntu-latest"
+    dependsOn:
+      - basicservicePushImage
+      - basicserviceProvisionServiceResources
+    steps:
+      - template: ../pipeline-files/downloadRequirements.yaml
+      - task: DownloadPipelineArtifact@2
+        displayName: "Download artifact directory"
+        inputs:
+          artifactName: basicservice_ArtifactDirectory
+          targetPath: "$(System.DefaultWorkingDirectory)/testing/canonical-output/basicservice/server/artifacts"
+      - task: AzureCLI@2
+        displayName: Deploy and test service
+        inputs:
+          # azureSubscription corresponds to the name of the azure resource manager service
+          # connection that is supposed to be used for the pipeline task.
+          azureSubscription: ServiceHubServiceConnection
+          scriptType: "bash"
+          scriptLocation: "scriptPath"
+          scriptPath: testing/canonical-output/basicservice/server/test/deployService.sh

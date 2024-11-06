@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: <<.serviceInput.directoryName>>-demoserver
+  labels:
+    app: <<.serviceInput.directoryName>>-demoserver
+  namespace: (V_NAMESPACE)
+spec:
+  selector:
+    app: <<.serviceInput.directoryName>>-demoserver
+  ports:
+    - port: 50171
+      protocol: TCP
+      targetPort: 50171

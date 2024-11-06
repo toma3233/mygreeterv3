@@ -1,0 +1,4 @@
+resources:
+- ../../base
+patchesStrategicMerge:
+- intv2.yaml

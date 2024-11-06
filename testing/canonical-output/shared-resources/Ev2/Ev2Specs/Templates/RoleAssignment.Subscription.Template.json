@@ -1,0 +1,44 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "principalId": {
+            "type": "string",
+            "metadata": {
+                "description": "The principal to assign the role to"
+            }
+        },
+        "builtInRoleType": {
+            "type": "string",
+            "allowedValues": [
+                "Owner",
+                "Contributor",
+                "Reader",
+                "Azure Service Deploy Release Management Contributor",
+                "Azure Service Deploy Release Management Restricted Owner"
+            ],
+            "metadata": {
+                "description": "Built-in role to assign"
+            }
+        }
+    },
+    "variables": {
+        // Built-in Azure roles have pre-defined role definition identifiers: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles
+        "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+        "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "Azure Service Deploy Release Management Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '6572f2b3-e27a-4b1e-9ae4-6ae7bc27e7f0')]",
+        "Azure Service Deploy Release Management Restricted Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '2e3139bd-5b90-4b1c-a0f8-bc0766ca288d')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2018-09-01-preview",
+            "name": "[guid(concat(subscription().id,parameters('builtInRoleType'),parameters('principalId')))]",
+            "properties": {
+                "roleDefinitionId": "[variables(parameters('builtInRoleType'))]",
+                "principalId": "[parameters('principalId')]"
+            }
+        }
+    ]
+}

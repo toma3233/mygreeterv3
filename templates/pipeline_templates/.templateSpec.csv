@@ -1,0 +1,6 @@
+File name,Overwrite,Users,Rename
+OneBranch.Official.Build.yml,true,[external],
+OneBranch.Official.Release.Example.yml,true,[external],
+buildEv2Artifacts.sh,true,[external],
+downloadRequirements.yaml,true,[external],
+testServiceResourceAndCode.yaml,true,[external],

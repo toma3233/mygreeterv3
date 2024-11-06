@@ -1,0 +1,12 @@
+###################################
+# User inputs.
+###################################
+serviceInput:
+  # The directory name after destination_dir_prefix. It holds the service.
+  directoryName: mygreeterv3
+  # The service name in the protobuf.
+  serviceName: MyGreeter
+  # The template name to use for this service.
+  templateName: mygreeterGoTemplate
+  # Whether to add this service to the umbrella pipeline
+  runPipeline: true

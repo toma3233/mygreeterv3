@@ -1,0 +1,14 @@
+package server
+
+import (
+	"context"
+	pb "<<apiModule .envInformation.goModuleNamePrefix .serviceInput.directoryName>>/v1"
+	"github.com/Azure/aks-middleware/ctxlogger"
+)
+
+func (s *Server) {{.Name}}(ctx context.Context, in *pb.{{.RequestType}}) (*pb.{{.ReturnsType}}, error) {
+	logger := ctxlogger.GetLogger(ctx)
+	logger.Info("API handler logger output. req: ", in)
+
+	return &pb.{{.ReturnsType}}{}, nil
+}

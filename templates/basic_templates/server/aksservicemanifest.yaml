@@ -1,0 +1,210 @@
+name: <<.serviceInput.directoryName>>
+
+# controls whether we need to generate the bazel build files for the arm64 binary/images
+# and whether build the arm64 binary/images artifacts
+multiArch: false
+enabledInE2E: true
+signImage: true
+
+devInfraReleasePipelineReconcilerInfo:
+  enableUseDevInfraReleasePipelineReconciler: true
+  azureDevopsReleasePipelineDefinitionId: 1
+  disableSov: true
+  disableAirgapped: true
+  disableInt: false
+
+serviceGroup: microsoft.azurekubernetesservice.<<.serviceInput.directoryName>>
+# we could only have one go prefix for every workspace
+goPrefix: <<serverModule .envInformation.goModuleNamePrefix .serviceInput.directoryName>>
+
+packageDirs:
+  - name: client
+    src: deployers/client
+    pattern: "**"
+    target: /
+  - name: server
+    src: deployers/server
+    pattern: "**"
+    target: /
+  - name: demoserver
+    src: deployers/demoserver
+    pattern: "**"
+    target: /
+
+binaries:
+  - name: <<.serviceInput.directoryName>>-client
+    lang: golang
+    codePath: "cmd/client"
+  - name: <<.serviceInput.directoryName>>-server
+    lang: golang
+    codePath: "cmd/server"
+  - name: <<.serviceInput.directoryName>>-demoserver
+    lang: golang
+    codePath: "cmd/demoserver"
+
+# TODO: Understand what it is for.
+externalBazelBinaries:
+  - name: deployerreleaser-linux-amd64
+    workspace: ../../deployer/server
+    buildTarget: //cmd/releaser:releaser-linux-amd64
+
+images:
+  - baseRepo: acs
+    name: <<.serviceInput.directoryName>>-client
+    publishMode: copy
+    # PublishTarget can be devinfraacr or overlayacr.
+    # The publishTarget eventually gets mapped to an Azure Container Registry (ACR), where the image is published.
+    # The ACR_SERVER variable in our deployers directory indicates the ACR associated with the publishTarget for the DEPLOY_ENV.
+    publishTarget: overlayacr
+    baseImage: mcr.microsoft.com/aks/devinfra/base-os-runtime-static:master.231012.1
+    binaries:
+      - name: <<.serviceInput.directoryName>>-client # ref to the item in the binaries
+        targetdir: "/"
+  - baseRepo: acs
+    name: <<.serviceInput.directoryName>>-server
+    publishMode: copy
+    publishTarget: overlayacr
+    baseImage: mcr.microsoft.com/aks/devinfra/base-os-runtime-static:master.231012.1
+    binaries:
+      - name: <<.serviceInput.directoryName>>-server # ref to the item in the binaries
+        targetdir: "/"
+  - baseRepo: acs
+    name: <<.serviceInput.directoryName>>-demoserver
+    publishMode: copy
+    publishTarget: overlayacr
+    baseImage: mcr.microsoft.com/aks/devinfra/base-os-runtime-static:master.231012.1
+    binaries:
+      - name: <<.serviceInput.directoryName>>-demoserver # ref to the item in the binaries
+        targetdir: "/"
+
+deployerApplications:
+  - cseApp:
+      name: <<.serviceInput.directoryName>>-client
+      image:
+        url: "mcr.microsoft.com/aks/devinfra/deploybox:master.240323.1"
+      binaryEntryPoint: ./release-via-deployer
+      variableBindings:
+        - name: "CLOUD_ENV_SDK"
+          value: "$(deployerCloudNameGoSDK)"
+        - name: "DEPLOY_ENV"
+          value: "$(overrideDeployEnv)"
+        - name: "REGION"
+          value: "$(deployRegion)"
+        - name: "DEPLOYER_REGIONAL_STORAGE_NAME"
+          value: "$(deployer_regional_storage_name)"
+        - name: "MSI_OPERATOR_RESOURCE_ID"
+          value: "$(msi_operator_resource_id)"
+        - name: "RELEASE_UNDERLAY_TYPE"
+          value: svc
+        # TODO: Need to understand the meaning.
+        - name: "RELEASE_COMPONENTS"
+          value: <<.serviceInput.directoryName>>-client
+
+        - name: PRIMARY_SVC_UNDERLAY
+          value: "$(service_cluster_name)"
+        - name: BACKUP_SVC_UNDERLAY
+          value: ""
+        - name: UNDERLAY_TYPE_BLOB_URL
+          value: "https://$(deployer_regional_storage_name).blob.$(storage_suffix)/clustertype/$(resource_name_prefix)$(deployRegion).yaml"
+        - name: GODEBUG
+          value: x509ignoreCN=0
+    deployerPkg: client
+  - cseApp:
+      name: <<.serviceInput.directoryName>>-server
+      image:
+        url: "mcr.microsoft.com/aks/devinfra/deploybox:master.240323.1"
+      binaryEntryPoint: ./release-via-deployer
+      variableBindings:
+        - name: "CLOUD_ENV_SDK"
+          value: "$(deployerCloudNameGoSDK)"
+        - name: "DEPLOY_ENV"
+          value: "$(overrideDeployEnv)"
+        - name: "REGION"
+          value: "$(deployRegion)"
+        - name: "DEPLOYER_REGIONAL_STORAGE_NAME"
+          value: "$(deployer_regional_storage_name)"
+        - name: "MSI_OPERATOR_RESOURCE_ID"
+          value: "$(msi_operator_resource_id)"
+        - name: "RELEASE_UNDERLAY_TYPE"
+          value: svc
+        - name: "RELEASE_COMPONENTS"
+          value: <<.serviceInput.directoryName>>-server
+
+        - name: PRIMARY_SVC_UNDERLAY
+          value: "$(service_cluster_name)"
+        - name: HCP_ENDPOINT_URI
+          value: "$(hcp_endpoint_uri)"
+        - name: DEPLOYER_ENVSUBST_KEYS
+          value: "HCP_ENDPOINT_URI"
+    deployerPkg: server
+  - cseApp:
+      name: <<.serviceInput.directoryName>>-demoserver
+      image:
+        url: "mcr.microsoft.com/aks/devinfra/deploybox:master.240323.1"
+      binaryEntryPoint: ./release-via-deployer
+      variableBindings:
+        - name: "CLOUD_ENV_SDK"
+          value: "$(deployerCloudNameGoSDK)"
+        - name: "DEPLOY_ENV"
+          value: "$(overrideDeployEnv)"
+        - name: "REGION"
+          value: "$(deployRegion)"
+        - name: "DEPLOYER_REGIONAL_STORAGE_NAME"
+          value: "$(deployer_regional_storage_name)"
+        - name: "MSI_OPERATOR_RESOURCE_ID"
+          value: "$(msi_operator_resource_id)"
+        - name: "RELEASE_UNDERLAY_TYPE"
+          value: svc
+        - name: "RELEASE_COMPONENTS"
+          value: <<.serviceInput.directoryName>>-demoserver
+
+        - name: PRIMARY_SVC_UNDERLAY
+          value: "$(service_cluster_name)"
+        - name: HCP_ENDPOINT_URI
+          value: "$(hcp_endpoint_uri)"
+        - name: DEPLOYER_ENVSUBST_KEYS
+          value: "HCP_ENDPOINT_URI"
+    deployerPkg: demoserver
+
+# TODO: Understand what it is for.
+mdmHealthCheck:
+  - name: aksrunnerv2health-mdm
+    templateVersion: "v2"
+    monitoringAccountName: "$(devInfra.globalResources.monitoringAccountName)"
+    healthModelResourceType: "aks-runner-v2"
+    healthCheckDurationWait: "240"
+    healthCheckDurationElastic: "1320"
+    healthModelResourceDimensions:
+      - name: "monitor.Tenant"
+        value: "$(devInfra.globalResources.monitoringAccountName)"
+      - name: "deploy_env"
+        value: "$(deployEnv)"
+      - name: "region"
+        value: "$(deployRegion)"
+  - name: aksrunnerv2health
+    templateVersion: "v2"
+    # this mdm health signal is generated with KustoToMetric.
+    # The IcM Kusto is only in global and includes icm in both global and sovereign regions.
+    # So for gb and sov, both use the gb account.
+    monitoringAccountName: "aksdevinfragbprod"
+    healthModelResourceType: "aks-icm-by-region"
+    healthCheckDurationWait: "$(runner.default.healthCheckDurationWait)"
+    healthCheckDurationElastic: "1260"
+    healthModelResourceDimensions:
+      - name: "monitor.Tenant"
+        value: "aksdevinfragbprod"
+      - name: "region"
+        value: "$(deployRegion)"
+      - name: "deploy_env"
+        value: "$(deployEnv)"
+
+# TODO: Understand what it is for.
+variables:
+  defaults:
+    overrideDeployEnv: $(deployEnv) # this is for the intv2 in deployer scripts
+  overrides:
+    gb:
+      overrides:
+        int:
+          defaults:
+            overrideDeployEnv: intv2

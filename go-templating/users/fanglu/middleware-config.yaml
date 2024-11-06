@@ -1,0 +1,10 @@
+###################################
+# User inputs.
+###################################
+inputs:
+  # # The following are variables used when generating middleware. Currently using middleware-config.yaml as an example
+  #goModuleName must match destinationDir according to go path rules.
+  goModuleName: go.goms.io/aks/rp/aks-middleware
+  # A directory on your computer where the service will be stored.
+  # For AKS, it is directory that holds the aks-rp repo.
+  destinationDir: ~/aks-rp/aks-middleware

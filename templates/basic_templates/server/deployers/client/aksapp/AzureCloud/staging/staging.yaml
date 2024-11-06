@@ -1,0 +1,14 @@
+apiVersion: deployer.aks/v1
+kind: AksApp
+metadata:
+  name: <<.serviceInput.directoryName>>-client
+  namespace: <<.serviceInput.directoryName>>
+spec:
+  variables:
+    DEPLOY_ENV: staging
+    CLOUD_ENVIRONMENT: AZUREPUBLICCLOUD
+    ACR_MSI_ResourceID: "/subscriptions/0159df5c-b605-45a9-9876-36e17d5286e0/resourceGroups/stg-overlay-${REGION}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/stg-aks-svc-acr-pull"
+    ENABLE_GOSHUTTLE_LOG: "ALL"
+    RG_NAME: "stg-<<.sharedInput.productShortName>>-${REGION}"
+    RG_REGION: "${REGION}"
+    CALL_ALL_RG_OPS: "false"

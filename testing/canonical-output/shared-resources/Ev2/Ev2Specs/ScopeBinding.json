@@ -1,0 +1,61 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+{
+    "$schema": "https://ev2schema.azure.net/schemas/2020-01-01/scopeBindings.json",
+    "contentVersion": "1.0.0.0",
+    "scopeBindings": [
+        {
+            "scopeTagName": "sharedInputs",
+            "bindings": [
+                {
+                    "find": "{{.resourcesName}}",
+                    "replaceWith": "official"
+                },
+                {
+                    "find": "{{.subscriptionId}}",
+                    "replaceWith": "$azureSubscriptionId()"
+                },
+                {
+                    "find": "{{.location}}",
+                    "replaceWith": "$location()"
+                },
+                {
+                    "find": "{{.resourceGroupName}}",
+                    "replaceWith": "$azureResourceGroup()"
+                }
+            ]
+        },
+        {
+            "scopeTagName": "subscriptionInputs",
+            "bindings": [
+                {
+                    "find": "{{.adminSecurityGroupId}}",
+                    "replaceWith": "6779196b-41a9-45e9-9cf4-e1192539fbce"
+                },
+                {
+                    "find": "{{.serviceTreeId}}",
+                    "replaceWith": "3c3a9111-8d68-418f-8868-96641e1510d0"
+                },
+                {
+                    "find": "{{.secondLevelServiceTreeNodeId}}",
+                    "replaceWith": "ef733b4f-da1d-4909-8495-73785ce205aa"
+                },
+                {
+                    "find": "{{.pcCode}}",
+                    "replaceWith": "P84536"
+                },
+                {
+                    "find": "{{.costCategory}}",
+                    "replaceWith": "FR"
+                },
+                {
+                    "find": "{{.airsRegisteredUserPrincipalId}}",
+                    "replaceWith": "23551938-26fb-4713-bb60-456716564972"
+                },
+                {
+                    "find": "{{.tenantId}}",
+                    "replaceWith": "$config(tenantId)"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: Download environment config artifact
+    inputs:
+      artifactName: EnvConfig
+      targetPath: "$(System.DefaultWorkingDirectory)/<<.sharedInput.directoryPath>>"

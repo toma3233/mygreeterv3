@@ -1,0 +1,99 @@
+{
+  "$schema": "https://ev2schema.azure.net/schemas/2020-04-01/RegionAgnosticRolloutSpecification.json",
+  "contentVersion": "1.0.0",
+  "rolloutMetadata": {
+    "serviceModelPath": "ServiceModel.json",
+    "scopeBindingsPath": "ScopeBinding.json",
+    "name": "Microsoft.Azure.Ev2.ServiceResources",
+    "buildSource": {
+      "parameters": {
+        "versionFile": "Version.txt"
+      }
+    },
+    "notification": {
+      "email": {
+        "to": "<<.serviceInput.contactEmail>>"
+      }
+    },
+    "configuration": {
+      "serviceScope": {
+        "specPath": "Configuration.json"
+      }
+    }
+  },
+  "orchestratedSteps": [
+    {
+      "name": "PublishImageToAcr",
+      "targetType": "ServiceResourceDefinition",
+      "targetName": "PublishImageShellExtension-SRDef",
+      "actions": [
+        "Shell/push-image-to-acr"
+      ]
+    },
+    {
+      "name": "DeployServiceResources",
+      "targetType": "ServiceResourceDefinition",
+      "targetName": "azureSDKResources-SRDef",
+      "actions": [
+        "deploy"
+      ]
+    },
+    {
+      "name": "HelmDeploy-<<.serviceInput.directoryName>>-client",
+      "targetType": "ApplicationDefinition",
+      "applications": {
+        "names": [
+          "<<.serviceInput.directoryName>>client"
+        ],
+        "actions": [
+          "AppDeploy"
+        ],
+        "applyAcrossServiceResources": {
+          "definitionName": "<<.serviceInput.directoryName>>client-SRDef"
+        }
+      },
+      "dependsOn": [
+        "DeployServiceResources",
+        "PublishImageToAcr"
+      ]
+    },
+    {
+      "name": "HelmDeploy-<<.serviceInput.directoryName>>-server",
+      "targetType": "ApplicationDefinition",
+      "applications": {
+        "names": [
+          "<<.serviceInput.directoryName>>server"
+        ],
+        "actions": [
+          "AppDeploy"
+        ],
+        "applyAcrossServiceResources": {
+          "definitionName": "<<.serviceInput.directoryName>>server-SRDef"
+        }
+      },
+      "dependsOn": [
+        "DeployServiceResources",
+        "PublishImageToAcr"
+      ]
+    },
+    {
+      "name": "HelmDeploy-<<.serviceInput.directoryName>>-demoserver",
+      "targetType": "ApplicationDefinition",
+      "applications": {
+        "names": [
+          "<<.serviceInput.directoryName>>demoserver"
+        ],
+        "actions": [
+          "AppDeploy"
+        ],
+        "applyAcrossServiceResources": {
+          "definitionName": "<<.serviceInput.directoryName>>demoserver-SRDef"
+        }
+      },
+      "dependsOn": [
+        "DeployServiceResources",
+        "PublishImageToAcr"
+      ]
+    }
+  ]
+}

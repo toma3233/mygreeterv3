@@ -1,0 +1,37 @@
+######################################################################
+######################################################################
+# User inputs.
+######################################################################
+######################################################################
+sharedInput:
+  # # The following are variables used when generating resources and pipeline modules.
+  # A directory on your computer where the shared resources and pipeline folders will be stored.
+  destinationDirPrefix: ../testing/generated-output
+  # Absolute path used for pipeline and script files.
+  # Only relevant for service hub testing.
+  directoryPath: testing/canonical-output/
+###################################
+# Shared resources variables
+###################################
+resourceInput:
+  # The directory name after destination_dir_prefix. It holds the shared resources.
+  directoryName: shared-resources
+  # The naming convention of the shared resources in production for Ev2.
+  ev2ResourcesName: official
+  # The primary email address for the service. This is for Ev2 notifications.
+  # The service tree id of your service.
+  serviceTreeId: 3c3a9111-8d68-418f-8868-96641e1510d0
+  ################################
+  # The template name to use for the shared resources folder.
+  # Only used by internal templating code to determine which template to use.
+  templateName: resourcesTemplate
+###################################
+# Pipeline files variables.
+###################################
+pipelineInput:
+  # The directory name after destination_dir_prefix. It holds the pipeline files.
+  directoryName: pipeline-files
+  ################################
+  # The template name to use for the pipelines folder.
+  # Only used by internal templating code to determine which template to use.
+  templateName: pipelineTemplate

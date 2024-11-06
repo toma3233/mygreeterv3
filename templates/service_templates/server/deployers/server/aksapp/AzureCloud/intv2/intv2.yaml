@@ -1,0 +1,15 @@
+apiVersion: deployer.aks/v1
+kind: AksApp
+metadata:
+  name: <<.serviceInput.directoryName>>-server
+  namespace: <<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>
+spec:
+  variables:
+    DEPLOY_ENV: "intv2"
+    ACR_SERVER: "aksdeploymentintv2.azurecr.io"
+    ACR_MSI_ResourceID: "/subscriptions/8c4b4f4e-6bf7-4da8-a51a-d341baf3ce44/resourceGroups/int-overlay-${REGION}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/int-aks-svc-acr-pull"
+    CLOUD_ENVIRONMENT: AZUREPUBLICCLOUD
+    ENABLE_GOSHUTTLE_LOG: "ALL"
+    # For int, a new MSI is provisioned in a servicehub resource group named {resource_name_prefix}<<.sharedInput.productShortName>>-{REGION}, where 'resource_name_prefix' is "int-". The name of the MSI within these resource groups is {resource_name_prefix}servicehub.
+    # TODO: Update value once MSI Binding is done
+    IDENTITY_RESOURCE_ID: ""

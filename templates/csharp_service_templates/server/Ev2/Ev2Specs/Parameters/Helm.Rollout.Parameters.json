@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ev2schema.azure.net/schemas/2020-01-01/rolloutParameters.json",
+  "contentVersion": "1.0.0.0",
+  "applications": [
+    {
+      "ServiceResourceDefinitionName": "<<.serviceInput.directoryName>>server-SRDef",
+      "ApplicationDefinitionName": "<<.serviceInput.directoryName>>server",
+      "authentication": {
+        "armResourceName": "<<.sharedInput.productShortName>>-{{.resourcesName}}-cluster",
+        "type": "CertificateAuthentication",
+        "properties": {
+          "aksRole": "User"
+        }
+      }
+    }
+    {
+      "ServiceResourceDefinitionName": "<<.serviceInput.directoryName>>client-SRDef",
+      "ApplicationDefinitionName": "<<.serviceInput.directoryName>>client",
+      "authentication": {
+        "armResourceName": "<<.sharedInput.productShortName>>-{{.resourcesName}}-cluster",
+        "type": "CertificateAuthentication",
+        "properties": {
+          "aksRole": "User"
+        }
+      }
+    }
+  ]
+}

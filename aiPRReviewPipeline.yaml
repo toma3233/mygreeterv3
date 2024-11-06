@@ -1,0 +1,25 @@
+pool:
+  vmImage: "ubuntu-latest"
+steps:
+  - checkout: none
+  - script: |
+      docker run \
+        -e SYSTEM_COLLECTIONURI=${SYSTEM_COLLECTIONURI} \
+        -e SYSTEM_TEAMPROJECT=${SYSTEM_TEAMPROJECT} \
+        -e SYSTEM_PULLREQUEST_PULLREQUESTID=${SYSTEM_PULLREQUEST_PULLREQUESTID} \
+        -e BUILD_REPOSITORY_ID=${BUILD_REPOSITORY_ID} \
+        -e ADO_PAT_TOKEN=${SYSTEM_ACCESSTOKEN} \
+        -e AZURE_OPENAI_ENDPOINT="${AZURE_OPENAI_ENDPOINT}" \
+        -e AZURE_OPENAI_DEPLOYMENT_NAME="${AZURE_OPENAI_DEPLOYMENT_NAME}" \
+        -e AZURE_OPENAI_API_VERSION="${AZURE_OPENAI_API_VERSION}" \
+        -e AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY} \
+        -e USER_NAME="${USER_NAME}" \
+        -e MAX_THREADS=5 \
+        -e SKIP_LIST='[".bazel","go.mod","go.sum",".bzl","WORKSPACE",".txt", "go.work"]' \
+        servicehubregistry.azurecr.io/ai-pr-reviewer:${AI_PR_REVIEWER_IMAGE_TAG}
+    displayName: 'Run AI Pull Request Reviewer'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+      AZURE_OPENAI_API_KEY: $(AZURE_OPENAI_API_KEY)
+      AI_PR_REVIEWER_IMAGE_TAG: $(AI_PR_REVIEWER_IMAGE_TAG)
+

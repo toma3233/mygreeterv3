@@ -1,0 +1,10 @@
+#Where the templates for the service are stored
+mygreeterGoTemplate: ../templates/service_templates
+#Where the templates for the resources are stored
+resourcesTemplate: ../templates/resource-provisioning_templates
+#Where the templates for the pipelines are stored
+pipelineTemplate: ../templates/pipeline_templates
+#Where the templates for the readme and head of repo files are stored
+readmeTemplate: ../templates/readme_templates
+#Where the template for an empty service is stored.
+basicGoTemplate: ../templates/basic_templates

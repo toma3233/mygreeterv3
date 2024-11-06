@@ -1,0 +1,62 @@
+{
+    "$schema": "https://dataexplorer.azure.com/static/d/schema/51/dashboard.json",
+    "id": "3303e636-d213-4452-a5f9-b752f952f5b4",
+    "eTag": "359b71a0-7d30-41b1-8ed9-ffc3db3b66a3",
+    "schema_version": "51",
+    "title": "External <<.serviceInput.directoryName>> Dashboard",
+    "autoRefresh": {
+        "enabled": true,
+        "defaultInterval": "30m",
+        "minInterval": "5m"
+    },
+    "baseQueries": [
+        <<template "base_queries.json" . >>
+    ],
+    "queries": [
+        {
+            "id": "b5d22ee5-8297-4adf-ab56-404c2f7158fa",
+            "dataSource": {
+                "kind": "parameter",
+                "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+            },
+            "text": "ContainerLogV2\n| where LogMessage[\"source\"] == \"ApiRequestLog\"\n| extend PreciseTimeStamp = todatetime(LogMessage[\"time\"])\n| where PreciseTimeStamp between (_startTime.._endTime)\n| where LogMessage[\"msg\"] == \"finished call\"\n| where PodNamespace in (\"<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>-server\", \"<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>-demoserver\")",
+            "usedVariables": [
+                "_endTime",
+                "_startTime"
+            ]
+        },
+        {
+            "id": "1e39e591-61ea-4f3d-bc8e-4b4038e5cc3e",
+            "dataSource": {
+                "kind": "parameter",
+                "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+            },
+            "text": "_baseQuery\n| where ContainerName == _container\n| where LogMessage[\"component\"] == _component",
+            "usedVariables": [
+                "_baseQuery",
+                "_component",
+                "_container"
+            ]
+        },
+            <<template "queries.json" . >>
+    ],
+    "tiles": [
+        <<template "tiles.json" . >>
+    ],
+    "parameters": [
+        <<template "parameters.json" . >>
+    ],
+    "dataSources": [
+        {
+            "id": "1ede2aa1-b8a8-4aae-9dac-19ad6b648b77",
+            "name": "<<.sharedInput.productShortName>>-{{.resourcesName}}-data",
+            "clusterUri": "https://ade.loganalytics.io/subscriptions/{{.subscriptionId}}/resourcegroups/<<.sharedInput.productShortName>>-{{.resourcesName}}-rg/providers/microsoft.operationalinsights/workspaces/<<.sharedInput.productShortName>>-{{.resourcesName}}-workspace",
+            "database": "<<.sharedInput.productShortName>>-{{.resourcesName}}-workspace",
+            "kind": "manual-kusto",
+            "scopeId": "kusto"
+        }
+    ],
+    "pages": [
+        <<template "pages.json" . >>
+    ]
+}

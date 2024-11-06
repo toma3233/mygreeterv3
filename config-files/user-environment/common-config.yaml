@@ -1,0 +1,64 @@
+######################################################################
+######################################################################
+# User inputs.
+######################################################################
+######################################################################
+sharedInput:
+  # # The following are variables used when generating resources and pipeline modules.
+  # A directory on your computer where the shared resources and pipeline folders will be stored.
+  destinationDirPrefix: ../user-environment/generated-output
+  # Absolute path used for pipeline and script files.
+  # Only relevant for service hub testing.
+  directoryPath: ""
+  # The official display name of your product.
+  productDisplayName: AKS Service Hub
+  # The official short name (only lowercase letters) of your product.
+  productShortName: servicehub
+###################################
+# Shared resources variables
+###################################
+resourceInput:
+  # The directory name after destination_dir_prefix. It holds the shared resources.
+  directoryName: shared-resources
+  # The naming convention of the shared resources in production for Ev2.
+  ev2ResourcesName: official
+  # The primary email address for the shared-resources. This is for Ev2 notifications.
+  contactEmail: ksehgal@microsoft.com
+  # The service tree id of your service.
+  serviceTreeId: 3c3a9111-8d68-418f-8868-96641e1510d0
+  # The second level service tree node id of your service.
+  # For example, if Ownership Hierarchy: Cloud + AI Platform -> Azure Core -> Azure Management and Platforms -> Containers (BBURNS) -> AKS Service Hub
+  # The second level service tree node id is the id for Azure Core.
+  secondLevelServiceTreeNodeId: ef733b4f-da1d-4909-8495-73785ce205aa
+  # The principal id of your service admin security group for production resources.
+  adminSecurityGroupId: 6779196b-41a9-45e9-9cf4-e1192539fbce
+  # The AAD principal object Id of the owner of the AIRS registration.
+  # This user is set as the Account Admin of the created subscriptions.
+  # Refer to https://ev2docs.azure.net/features/service-artifacts/actions/subscriptionProvisioningParameters.html#airs-configuration
+  # for how to create/get this value.
+  airsRegisteredUserPrincipalId: 23551938-26fb-4713-bb60-456716564972
+  # The tenant Id of the account that owns the AIRS registration.
+  # This is a required property if the AIRS registration being used is not CORP/MSFT account.
+  airsRegisteredUserTenantId: 33e01921-4d64-4f8c-a055-5bdaffd5e33d
+  # The PC Code for the subscription billing.
+  pcCode: P84536
+  # The cost category for the subscription billing and to be one of the below listed values:
+  # FX: Cost of Goods Sold
+  # FG: General and Administrative
+  # FR: Research and Development
+  # FS: Sales and Marketing
+  costCategory: FR
+  ################################
+  # The template name to use for the shared resources folder.
+  # Only used by internal templating code to determine which template to use.
+  templateName: resourcesTemplate
+###################################
+# Pipeline files variables.
+###################################
+pipelineInput:
+  # The directory name after destination_dir_prefix. It holds the pipeline files.
+  directoryName: pipeline-files
+  ################################
+  # The template name to use for the pipelines folder.
+  # Only used by internal templating code to determine which template to use.
+  templateName: pipelineTemplate

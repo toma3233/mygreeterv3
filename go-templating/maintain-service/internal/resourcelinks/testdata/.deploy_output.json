@@ -1,0 +1,67 @@
+{
+    "name": "testdeploy",
+    "properties": {
+        "dependencies": [
+            {
+                "dependsOn": [
+                    {
+                        "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.Resources/deployments/test-data-collection-ruleDeploy",
+                        "resourceGroup": "test-rg",
+                        "resourceName": "test-data-collection-ruleDeploy",
+                        "resourceType": "Microsoft.Resources/deployments"
+                    },
+                    {
+                        "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.Resources/deployments/test-workspaceDeploy",
+                        "resourceGroup": "test-rg",
+                        "resourceName": "test-workspaceDeploy",
+                        "resourceType": "Microsoft.Resources/deployments"
+                    },
+                    {
+                        "apiVersion": "2022-09-01",
+                        "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.Resources/deployments/test-workspaceDeploy",
+                        "resourceGroup": "test-rg",
+                        "resourceName": "test-workspaceDeploy",
+                        "resourceType": "Microsoft.Resources/deployments"
+                    }
+                ],
+                "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.Resources/deployments/test-clusterDeploy",
+                "resourceName": "test-clusterDeploy"
+            },
+            {
+                "dependsOn": [
+                    {
+                        "id": "/subscriptions/1111/providers/Microsoft.Resources/deployments/test-rgDeploy",
+                        "resourceName": "test-rgDeploy",
+                        "resourceType": "Microsoft.Resources/deployments"
+                    },
+                    {
+                        "apiVersion": "2022-09-01",
+                        "id": "/subscriptions/1111/providers/Microsoft.Resources/deployments/test-rgDeploy",
+                        "resourceName": "test-rgDeploy",
+                        "resourceType": "Microsoft.Resources/deployments"
+                    },
+                    {
+                        "apiVersion": "2022-09-01",
+                        "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.Resources/deployments/test-workspaceDeploy",
+                        "resourceGroup": "test-rg",
+                        "resourceName": "test-workspaceDeploy",
+                        "resourceType": "Microsoft.Resources/deployments"
+                    }
+                ],
+                "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.Resources/deployments/test-acrDeploy",
+                "resourceGroup": "test-rg",
+                "resourceName": "test-acrDeploy"
+            }
+        ],
+        "outputResources": [
+            {
+                "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.ContainerRegistry/registries/testacr",
+                "resourceGroup": "test-rg"
+            },
+            {
+                "id": "/subscriptions/1111/resourceGroups/test-rg/providers/Microsoft.ContainerService/managedClusters/test-cluster",
+                "resourceGroup": "test-rg"
+            }
+        ]
+    }
+}

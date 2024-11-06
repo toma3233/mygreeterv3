@@ -1,0 +1,146 @@
+{
+    "id": "21e6efd2-6c31-456c-b1fe-d1bd290ba2df",
+    "title": "<<.serviceInput.directoryName>> Dashboard",
+    "visualType": "markdownCard",
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "layout": {
+        "x": 5,
+        "y": 0,
+        "width": 8,
+        "height": 2
+    },
+    "markdownText": "## <<.serviceInput.serviceName>> Metrics",
+    "visualOptions": {}
+},
+{
+    "id": "df4deeb4-d4b1-4050-9f9c-89f74ea4dc8a",
+    "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 10,
+        "height": 10
+    },
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "title": "Error ratio (%)",
+    "visualType": "scatter",
+    "queryRef": {
+        "kind": "query",
+        "queryId": "a9efb186-e844-4ecd-a62a-d3a8bde685dd"
+    },
+    "visualOptions": {
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Ratio",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "PreciseTimeStamp",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "ratio"
+        ],
+        "crossFilter": [],
+        "drillthrough": []
+    }
+},
+{
+    "id": "e92071bc-74cb-4121-86f3-bd815ed27cc3",
+    "layout": {
+        "x": 5,
+        "y": 12,
+        "width": 10,
+        "height": 10
+    },
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "title": "Latency by error code (msec)",
+    "visualType": "scatter",
+    "queryRef": {
+        "kind": "query",
+        "queryId": "dbc942d4-883a-4fd0-8ee3-b536ee58be69"
+    },
+    "visualOptions": {
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Latency (msec)",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "PreciseTimeStamp",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "latency"
+        ],
+        "crossFilter": [],
+        "drillthrough": []
+    }
+},
+{
+    "id": "b2c5a047-365e-49c7-8437-1df2ff0e1738",
+    "layout": {
+        "x": 10,
+        "y": 2,
+        "width": 10,
+        "height": 10
+    },
+    "pageId": "0c7d1052-237a-4600-8cda-b45b91e5c3e5",
+    "title": "QPS by error code",
+    "visualType": "scatter",
+    "queryRef": {
+        "kind": "query",
+        "queryId": "2540c945-7341-4778-86bf-3047ac38db4d"
+    },
+    "visualOptions": {
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "hideLegend": false,
+        "multipleYAxes": {
+            "additional": [],
+            "base": {
+                "columns": [],
+                "horizontalLines": [],
+                "id": "-1",
+                "label": "Query Per Second",
+                "yAxisMaximumValue": null,
+                "yAxisMinimumValue": null,
+                "yAxisScale": "linear"
+            },
+            "showMultiplePanels": false
+        },
+        "seriesColumns": null,
+        "verticalLine": "",
+        "xAxisScale": "linear",
+        "xColumn": "PreciseTimeStamp",
+        "xColumnTitle": "Timestamp",
+        "yColumns": [
+            "QPS"
+        ],
+        "crossFilter": [],
+        "drillthrough": []
+    }
+}

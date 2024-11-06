@@ -1,0 +1,12 @@
+######################################################################
+######################################################################
+# User inputs.
+######################################################################
+######################################################################
+sharedInput:
+  # # The following are variables used when generating resources and pipeline modules.
+  # A directory on your computer where the shared resources and pipeline folders will be stored.
+  destinationDirPrefix: ../testing/generated-output
+  # Absolute path used for pipeline and script files.
+  # Only relevant for service hub testing.
+  directoryPath: testing/canonical-output/

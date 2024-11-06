@@ -1,0 +1,41 @@
+apiVersion: deployer.aks/v1
+kind: AksApp
+metadata:
+  name: <<.serviceInput.directoryName>>-server
+  namespace: <<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>
+spec:
+  type: <<.serviceInput.directoryName>>-server
+  version: ${VERSION}
+  variables:
+    DEPLOY_ENV: ""
+    REPLICAS: "3"
+    API_LINKERD: "enabled"
+
+    ACR_SERVER: "acsproddeployment.azurecr.io"
+    ACR_MSI_ResourceID: ""
+
+    IMAGE_ORG: "acs"
+    IMAGE_FINAL_TAG: "@${<<.serviceInput.directoryName|upper>>_SERVER_IMAGE_DIGEST}"
+
+    IMAGE_PULL_POLICY: "IfNotPresent"
+
+    REGION: ${REGION} # predefined: passed to configuration files
+    FULL_UNDERLAY_NAME: ${FULL_UNDERLAY_NAME} # predefined: passed to configuration files
+
+    GODEBUG: ""
+
+    AKS_BIN_VERSION_VERSION: "${AKS_BIN_VERSION_VERSION}"
+    AKS_BIN_VERSION_GITBRANCH: "${AKS_BIN_VERSION_GITBRANCH}"
+    AKS_BIN_VERSION_GITHASH: "${AKS_BIN_VERSION_GITHASH}"
+    AKS_BIN_VERSION_BUILDTIME: "${AKS_BIN_VERSION_BUILDTIME}"
+    E2E_OVERLAY_RESOURCE_SUBSCRIPTION: ""
+
+    NAMESPACE: <<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>
+
+    ENABLE_GOSHUTTLE_LOG: "NONE"
+
+    SUBSCRIPTION_ID: "8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8" # the subscription that the service makes azure calls to
+
+    IDENTITY_RESOURCE_ID: "" # the managed identity that the service uses to make azure calls
+
+    IMAGE_PULL_SECRET_NAME: apb-msi-acrpull-secret

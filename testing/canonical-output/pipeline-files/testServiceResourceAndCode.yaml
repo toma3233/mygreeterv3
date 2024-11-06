@@ -1,0 +1,77 @@
+variables:
+  - group: ADO_PAT
+
+stages:
+  - stage: creation_stage
+    displayName: Create all resources and deploy service
+    jobs:
+      - job: GenerateAndPublishEnvConfig
+        displayName: Generate and publish environment config
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - task: Bash@3
+            name: outputEnvVars
+            displayName: Generate environment config
+            inputs:
+              targetType: "inline"
+              script: |
+                uuid=$(tr -dc a-z0-9 </dev/urandom | head -c 10; echo)
+                # This assumes we have an environment variable called subscriptionId
+                echo "# A string that will be used for naming all resources that are created for this project." > $envConfig
+                echo "resourcesName: $uuid" >> $envConfig
+                echo "# The subscription Id to which we deploy our resources." >> $envConfig
+                echo "subscriptionId: $subscriptionId" >> $envConfig
+                echo "# The location of the resource group to which we deploy our resources." >> ${envConfig}
+                echo "location: $location" >> ${envConfig}
+                echo "# The resource group to which we deploy our resources." >> ${envConfig}
+                echo "resourceGroupName: servicehub-$uuid-rg" >> ${envConfig}
+                cat $envConfig
+                echo "##vso[task.logissue type=warning]Your unique id is: ${uuid}"
+                echo "##vso[task.setvariable variable=RESOURCES_NAME;isOutput=true]${uuid}"
+              failOnStderr: false
+            env:
+              envConfig: testing/canonical-output/env-config.yaml
+              subscriptionId: $(SUBSCRIPTION_ID)
+              location: $(LOCATION)
+          - task: PublishPipelineArtifact@1
+            displayName: Publish environment config yaml file as an artifact
+            inputs:
+              targetPath: testing/canonical-output/env-config.yaml
+              artifactName: EnvConfig
+      - job: ProvisionSharedResources
+        displayName: Provision shared resources
+        pool:
+          vmImage: "ubuntu-latest"
+        dependsOn:
+          - GenerateAndPublishEnvConfig
+        steps:
+          - template: downloadRequirements.yaml
+          - template: ../shared-resources/provisionSharedResourcesPipeline.yaml
+      #TODO: How to handle multiple services?
+      #Run deploy service pipeline
+      - template: ../basicservice/deployServicePipeline.yaml
+      - template: ../mygreeterv3/deployServicePipeline.yaml
+  - stage: deletion_stage
+    displayName: Delete all resources
+    dependsOn: creation_stage
+    condition: eq(variables.DELETE, true)
+    jobs:
+      - job: DeleteResourceGroup
+        displayName: Delete resource group
+        pool:
+          vmImage: "ubuntu-latest"
+        variables:
+          UID: $[replace(replace(eq(variables.RESOURCES_NAME, ''), True, stageDependencies.creation_stage.GenerateAndPublishEnvConfig.outputs['outputEnvVars.RESOURCES_NAME']), False, variables.RESOURCES_NAME)]
+        steps:
+          - task: AzureCLI@2
+            displayName: Delete resource group
+            inputs:
+              # azureSubscription corresponds to the name of the azure resource manager service
+              # connection that is supposed to be used for the pipeline task.
+              azureSubscription: ServiceHubServiceConnection
+              scriptType: "bash"
+              scriptLocation: "scriptPath"
+              scriptPath: testing/canonical-output/shared-resources/deleteResourceGroup.sh
+              # Corresponds to resourcesName in env-config.yaml and in the deletion script.
+              arguments: $(UID)

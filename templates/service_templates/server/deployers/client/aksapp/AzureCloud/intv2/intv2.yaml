@@ -1,0 +1,15 @@
+apiVersion: deployer.aks/v1
+kind: AksApp
+metadata:
+  name: <<.serviceInput.directoryName>>-client
+  namespace: <<.serviceInput.directoryName>>
+spec:
+  variables:
+    DEPLOY_ENV: "intv2"
+    ACR_SERVER: "aksdeploymentintv2.azurecr.io"
+    ACR_MSI_ResourceID: "/subscriptions/8c4b4f4e-6bf7-4da8-a51a-d341baf3ce44/resourceGroups/int-overlay-${REGION}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/int-aks-svc-acr-pull"
+    CLOUD_ENVIRONMENT: AZUREPUBLICCLOUD
+    ENABLE_GOSHUTTLE_LOG: "ALL"
+    RG_NAME: "int-<<.sharedInput.productShortName>>-${REGION}"
+    RG_REGION: "${REGION}"
+    CALL_ALL_RG_OPS: "false"

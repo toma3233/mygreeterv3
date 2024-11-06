@@ -1,0 +1,71 @@
+{
+    "dataSource": {
+        "kind": "parameter",
+        "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+    },
+    "text": "let tempBaseQuery = _tileBaseQuery\n| where LogMessage[\"method\"] == _method;\n\ntempBaseQuery\n| where LogMessage[\"protocol\"] == \"REST\"\n| extend code = toint(LogMessage[\"code\"])\n| summarize \n total = count(),\nerror = countif(code !between (200 .. 299)) \nby bin(PreciseTimeStamp,5m)\n| extend ratio = round(error * 100.0/total, 3)\n| project PreciseTimeStamp, ratio, protocol=\"REST\"\n\n| union\n\n(tempBaseQuery\n| where LogMessage[\"protocol\"] == \"grpc\"\n| extend code = tostring(LogMessage[\"code\"])\n| summarize \n total = count(),\nerror = countif(code != \"OK\") \nby bin(PreciseTimeStamp,5m)\n| extend ratio = round(error * 100.0/total, 3)\n| project PreciseTimeStamp, ratio, protocol=\"grpc\")\n",
+    "id": "a9efb186-e844-4ecd-a62a-d3a8bde685dd",
+    "usedVariables": [
+        "_method",
+        "_tileBaseQuery"
+    ]
+},
+{
+    "dataSource": {
+        "kind": "parameter",
+        "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+    },
+    "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\n_tileBaseQuery\n| where LogMessage[\"method\"] == _method\n| summarize latency = round( avg(todouble(LogMessage[\"time_ms\"])), 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(PreciseTimeStamp, binSizeMinute)",
+    "id": "dbc942d4-883a-4fd0-8ee3-b536ee58be69",
+    "usedVariables": [
+        "_method",
+        "_tileBaseQuery"
+    ]
+},
+{
+    "dataSource": {
+        "kind": "parameter",
+        "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+    },
+    "text": "let binSizeMinute = timespan(5m);\nlet binSizeSecond = binSizeMinute / 1s;\n_tileBaseQuery\n| where LogMessage[\"method\"] == _method or isempty(_method)\n| summarize QPS = round(count() / binSizeSecond, 3)\n    by\n    code=tostring(LogMessage[\"code\"]),\n    bin(PreciseTimeStamp, binSizeMinute)\n\n",
+    "id": "2540c945-7341-4778-86bf-3047ac38db4d",
+    "usedVariables": [
+        "_method",
+        "_tileBaseQuery"
+    ]
+},
+{
+    "dataSource": {
+        "kind": "parameter",
+        "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+    },
+    "text": "_baseQuery\n| distinct container=ContainerName\n",
+    "id": "d6f70dc3-7b47-4af6-a3f7-98486effc43b",
+    "usedVariables": [
+        "_baseQuery"
+    ]
+},
+{
+    "dataSource": {
+        "kind": "parameter",
+        "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+    },
+    "text": "_baseQuery\n| distinct component=tostring(LogMessage[\"component\"])\n",
+    "id": "b9413d5a-daf4-4e28-89eb-ac9659ff0f39",
+    "usedVariables": [
+        "_baseQuery"
+    ]
+},
+{
+    "dataSource": {
+        "kind": "parameter",
+        "parameterId": "0d2f33d6-0a43-4244-a5f0-70d3aad4ca92"
+    },
+    "text": "_baseQuery\n| where ContainerName == _container\n| where LogMessage[\"component\"] == _component\n| distinct method=tostring(LogMessage[\"method\"])",
+    "id": "e170a030-4cfc-4381-9ae5-fc12ccdf2027",
+    "usedVariables": [
+        "_baseQuery",
+        "_component",
+        "_container"
+    ]
+}

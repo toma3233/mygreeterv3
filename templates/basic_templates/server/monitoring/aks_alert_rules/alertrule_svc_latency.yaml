@@ -1,0 +1,44 @@
+apiVersion: adx-mon.azure.com/v1
+kind: AlertRule
+metadata:
+  name: <<.serviceInput.directoryName>>-latency-alert
+  namespace: rp-alerts
+spec:
+  database: AKSprod
+  interval: 24h # query executes every 24 hours
+  # For testing service hub service, <<.serviceInput.directoryName>>'s latency alert
+  # We provide an example latency alert rule for <<.serviceInput.directoryName>> service. Please modify the alert rule as desired.
+  # Note that _endTime and _region are provided by the alerting system.
+  # Here are some tasks you can (and should) do:
+  ## Change _environment in query to the desired environment.
+  ## Change namespace in query to the desired namespace.
+  ## Change the _threshold to a desired lower value to trigger the alert.
+  ## Remove `limit 1` in query and change interval. Otherwise, the alert will only trigger once every 24 hours.
+  # Parameters:
+  ## _threshold: the latency _threshold. If the latency is greater than this value, an alert is triggered.
+  query: |
+    let binSizeMinute = timespan(5m);
+    let binSizeSecond = binSizeMinute / 1s;
+    let _loglookbackSize = 24h;
+    let _loglookback = _endTime - _loglookbackSize;
+    let _environment = dynamic(["staging", "intv2"]);
+    let _namespace = "<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>";
+    let _threshold=1000;
+    let _severity = 4;
+    ApiRequestLog
+    | where PreciseTimeStamp between(_loglookback .. _endTime)
+    | where RPTenant == _region
+    | where Environment in (_environment)
+    | where namespace == _namespace
+    | where msg == "finished call"
+    | summarize latency = round(avg(todouble(time_ms)),3) by Cloud, Environment, RPTenant, namespace, container, component, method, code=tostring(code), bin(PreciseTimeStamp,binSizeMinute)
+    | where latency > _threshold
+    | extend Title = strcat("[", Cloud, "/", Environment, "][", RPTenant, "][", container, "/", component, "] high latency for method: ", method, ", ", latency, " > ", _threshold)
+    | extend Summary = Title
+    | extend TSG="https://dev.azure.com/service-hub-flg/service_hub/_wiki/wikis/service_hub.wiki/2/ServiceHub.wiki"
+    | extend Severity = _severity
+    | extend CorrelationId=strcat(Cloud, "/", RPTenant, "/", namespace, "/", container, "/", component, "/", method)
+    | project Cloud, RPTenant, CorrelationId, Title, Summary, Severity, TSG, container, component, method, latency, _threshold
+    | limit 1
+  autoMitigateAfter: 2h
+  destination: "MDM://AKSSERVICEHUB"

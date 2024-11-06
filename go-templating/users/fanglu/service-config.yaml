@@ -1,0 +1,30 @@
+# ##################################
+# User inputs.
+# ##################################
+inputs:
+  # The `goModuleNamePrefix` and the `serviceDirectoryName` leads to the complete module name.
+  # 
+  # Notes: 
+  # The server name in `goModuleNamePrefix` should not have . (dot) in it.
+  # If the server name is like a real server name (e.g., github.com),
+  #  `go mod tidy` will want to
+  # check with the server on Internet and complains that the module/server doesn't exist.
+  # 
+  # To generate a service for AKS, the `goModuleNamePrefix` has to be `go.goms.io/aks/rp` 
+  # For the user environment this file would be automatically generated, by the script
+# that creates the user environment (extracting the value from terraform output) however
+# for our development and testing it is manually generated as there is no terraform resources
+# to extract the output from.
+# To generate a service for AKS and our internal development, the `goModuleNamePrefix` has to be `go.goms.io/aks/rp`
+goModuleNamePrefix: go.goms.io/aks/rp
+  # A directory on your computer where the service will be stored.
+  # For AKS, it is directory that holds the aks-rp repo.
+  destinationDirPrefix: ~/aks-rp
+  # The directory name after destination_dir_prefix. It holds the service.
+  serviceDirectoryName: mygreeterv2
+  # The service name in the protobuf.
+  serviceName: MyGreeter
+  # The middleware module name. This is not decided yet. Thus keep this flexible.
+  # Once it is in a fixed location, we can remove this variable.
+  aksMiddlewareModuleName: go.goms.io/aks/rp/aks-middleware
+

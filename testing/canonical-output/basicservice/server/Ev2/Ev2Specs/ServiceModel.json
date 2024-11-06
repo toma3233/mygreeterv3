@@ -1,0 +1,194 @@
+{
+  "$schema": "https://ev2schema.azure.net/schemas/2020-04-01/RegionAgnosticServiceModel.json",
+  "contentVersion": "1.0.0",
+  "serviceMetadata": {
+    "serviceIdentifier": "3c3a9111-8d68-418f-8868-96641e1510d0",
+    "serviceGroup": "Microsoft.Azure.Ev2.ServiceResources.basicservice",
+    "environment": "$config(environment)",
+    "TenantId": "$config(tenantId)",
+    "displayName": "basicserviceDisplayName"
+  },
+  "serviceResourceGroupDefinitions": [
+    {
+      "name": "basicservice-SRGDef",
+      "subscriptionKey": "servicehub-$config(regionShortName)-sub",
+      "azureResourceGroupName": "servicehub-official-$config(regionShortName)-rg",
+      "ServiceResourceDefinitions": [
+        {
+          "name": "azureSDKResources-SRDef",
+          "composedOf": {
+            "arm": {
+              "templatePath": "Templates\\Azuresdk.ServiceResources.Template.json",
+              "parametersPath": "Parameters\\ServiceResources.Parameters.json",
+              "deploymentLevel": "Subscription"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            }
+          ]
+        },
+        {
+          "name": "basicserviceclient-SRDef",
+          "composedOf": {
+            "application": {
+              "names": [
+                "basicserviceclient"
+              ]
+            },
+            "extension": {
+              "rolloutParametersPath": "Parameters\\Helm.Rollout.Parameters.json"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            },
+            {
+              "name": "HelmInputs"
+            }
+          ]
+        },
+        {
+          "name": "basicserviceserver-SRDef",
+          "composedOf": {
+            "application": {
+              "names": [
+                "basicserviceserver"
+              ]
+            },
+            "extension": {
+              "rolloutParametersPath": "Parameters\\Helm.Rollout.Parameters.json"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            },
+            {
+              "name": "HelmInputs"
+            }
+          ]
+        },
+        {
+          "name": "basicservicedemoserver-SRDef",
+          "composedOf": {
+            "application": {
+              "names": [
+                "basicservicedemoserver"
+              ]
+            },
+            "extension": {
+              "rolloutParametersPath": "Parameters\\Helm.Rollout.Parameters.json"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            },
+            {
+              "name": "HelmInputs"
+            }
+          ]
+        },
+        {
+          "name": "PublishImageShellExtension-SRDef",
+          "composedOf": {
+            "extension": {
+              "rolloutParametersPath": "Parameters\\PublishImage.Parameters.json",
+              "shell": [
+                {
+                  "type": "push-image-to-acr",
+                  "properties": {
+                    "imageName": "adm-ubuntu-2004-l",
+                    "imageVersion": "v5"
+                  }
+                }
+              ]
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ApplicationDefinitions": [
+    {
+      "name": "basicserviceclient",
+      "rollbackOnFailure": false,
+      "azureKubernetesService": {
+        "releaseName": "basicservice-client",
+        "chart": {
+          "reference": {
+            "path": "Build\\basicservice-0.1.0.tgz"
+          }
+        },
+        "tools": {
+          "helm": {
+            "version": "3.11",
+            "arguments": {
+              "timeout": "PT30M"
+            }
+          }
+        },
+        "valuesPaths": [
+          "Build\\values-common.yaml",
+          "Build\\values-client.yaml"
+        ]
+      }
+    },
+    {
+      "name": "basicserviceserver",
+      "rollbackOnFailure": false,
+      "azureKubernetesService": {
+        "releaseName": "basicservice-server",
+        "chart": {
+          "reference": {
+            "path": "Build\\basicservice-0.1.0.tgz"
+          }
+        },
+        "tools": {
+          "helm": {
+            "version": "3.11",
+            "arguments": {
+              "timeout": "PT30M"
+            }
+          }
+        },
+        "valuesPaths": [
+          "Build\\values-common.yaml",
+          "Build\\values-server.yaml"
+        ]
+      }
+    },
+    {
+      "name": "basicservicedemoserver",
+      "rollbackOnFailure": false,
+      "azureKubernetesService": {
+        "releaseName": "basicservice-demoserver",
+        "chart": {
+          "reference": {
+            "path": "Build\\basicservice-0.1.0.tgz"
+          }
+        },
+        "tools": {
+          "helm": {
+            "version": "3.11",
+            "arguments": {
+              "timeout": "PT30M"
+            }
+          }
+        },
+        "valuesPaths": [
+          "Build\\values-common.yaml",
+          "Build\\values-demoserver.yaml"
+        ]
+      }
+    }
+  ]
+}

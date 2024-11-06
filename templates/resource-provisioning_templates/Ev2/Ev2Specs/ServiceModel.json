@@ -1,0 +1,68 @@
+{
+  "$schema": "https://ev2schema.azure.net/schemas/2020-04-01/RegionAgnosticServiceModel.json",
+  "contentVersion": "1.0.0",
+  "serviceMetadata": {
+    "serviceIdentifier": "<<.resourceInput.serviceTreeId>>",
+    "serviceGroup": "Microsoft.Azure.Ev2.SharedResources",
+    "environment": "$config(environment)",
+    "TenantId": "$config(tenantId)",
+    "displayName": "sharedResourcesDisplayName"
+  },
+  "subscriptionProvisioning": {
+    "rolloutParametersPath": "Parameters\\SubscriptionProvisioning.Parameters.json",
+    "scopeTags": [
+      {
+        "name": "sharedInputs"
+      },
+      {
+        "name": "subscriptionInputs"
+      }
+    ]
+  },
+  "serviceResourceGroupDefinitions": [
+    {
+      "name": "sharedResources-SRGDef",
+      "subscriptionKey": "<<.sharedInput.productShortName>>-$config(regionShortName)-sub",
+      "azureResourceGroupName": "<<.sharedInput.productShortName>>-<<.resourceInput.ev2ResourcesName>>-$config(regionShortName)-rg",
+      "ServiceResourceDefinitions": [
+        {
+          "name": "resourceProvider-SRDef",
+          "composedOf": {
+            "extension": {
+              "rolloutParametersPath": "Parameters\\RegisterResourceProvider.Parameters.json"
+            }
+          }
+        },
+        {
+          "name": "sharedResources-SRDef",
+          "composedOf": {
+            "arm": {
+              "templatePath": "Templates\\Main.SharedResources.Template.json",
+              "parametersPath": "Parameters\\Main.SharedResources.Parameters.json",
+              "deploymentLevel": "Subscription"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            }
+          ]
+        },
+        {
+          "name": "AcrPushResources-SRDef",
+          "composedOf": {
+            "arm": {
+              "templatePath": "Templates\\AcrPush.SharedResources.Template.json",
+              "parametersPath": "Parameters\\AcrPush.SharedResources.Parameters.json"
+            }
+          },
+          "scopeTags": [
+            {
+              "name": "sharedInputs"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

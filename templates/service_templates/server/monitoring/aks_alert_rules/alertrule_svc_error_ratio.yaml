@@ -1,0 +1,43 @@
+apiVersion: adx-mon.azure.com/v1
+kind: AlertRule
+metadata:
+  name: <<.serviceInput.directoryName>>-error-ratio-alert
+  namespace: rp-alerts
+spec:
+  database: AKSprod
+  interval: 24h # query executes every 24 hours
+  # For testing service hub service, <<.serviceInput.directoryName>>'s error ratio alert.
+  # We provide an example error ratio alert rule for <<.serviceInput.directoryName>> service. Please modify the alert as desired.
+  # Note that _endTime and _region are provided by the alerting system.
+  # Here are some tasks you can (and should) do:
+  ## Change _environment in query to the desired environment.
+  ## Change namespace in query to the desired namespace.
+  ## Change the __threshold to a desired lower value to trigger the alert.
+  ## Remove `limit 1` in query and change interval. Otherwise, the alert will only trigger once every 24 hours.
+  # Parameters:
+  ## _threshold: the error ratio _threshold. If the error ratio is greater than this value, an alert is triggered.
+  query: |
+    let _loglookbackSize = 24h;
+    let _loglookback = _endTime - _loglookbackSize;
+    let _environment = dynamic(["staging", "intv2"]);
+    let _namespace = "<<.sharedInput.productShortName>>-<<.serviceInput.directoryName>>";
+    let _threshold=150;
+    let _severity = 4;
+    ApiRequestLog
+    | where PreciseTimeStamp between(_loglookback .. _endTime)
+    | where RPTenant == _region
+    | where Environment in (_environment)
+    | where namespace == _namespace
+    | where msg == "finished call"
+    | extend timePoint = PreciseTimeStamp
+    | summarize total = count(), error = countif(code != "OK") by bin(timePoint,5m), Cloud, Environment, RPTenant, namespace, container, component, method
+    | extend errorRatio = round(error * 100.0/total, 3)
+    | where errorRatio > _threshold
+    | extend Title = strcat("[", Cloud, "/", Environment, "][", RPTenant, "][", container, "/", component, "] high error ratio for method ", method, ": ", errorRatio, " > ", _threshold)
+    | extend Summary = Title
+    | extend Severity = _severity
+    | extend CorrelationId = strcat_delim("/", Cloud, Environment, RPTenant, namespace, container, component, method)
+    | extend TSG = "https://dev.azure.com/service-hub-flg/service_hub/_wiki/wikis/service_hub.wiki/2/ServiceHub.wiki"
+    | limit 1
+  autoMitigateAfter: 2h
+  destination: "MDM://AKSSERVICEHUB"
