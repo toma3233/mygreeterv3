@@ -41,6 +41,9 @@ param principalType string = ''
 @sys.description('Specify true if the resource is a shared resource, or false if the resource is not shared.')
 param sharedResource bool = false
 
+@sys.description('The resource ID of the user-assigned managed identity.')
+param userAssignedIdentityResourceId string = ''
+
 resource roleAssignmentShared 'Microsoft.Authorization/roleAssignments@2022-04-01' existing = if (sharedResource) {
   name: name
 }
@@ -55,6 +58,14 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = i
     delegatedManagedIdentityResourceId: !empty(delegatedManagedIdentityResourceId) ? delegatedManagedIdentityResourceId : null
     conditionVersion: !empty(conditionVersion) && !empty(condition) ? conditionVersion : null
     condition: !empty(condition) ? condition : null
+  }
+}
+
+resource userAssignedIdentityRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, userAssignedIdentityResourceId, roleDefinitionId)
+  properties: {
+    roleDefinitionId: roleDefinitionId
+    principalId: userAssignedIdentityResourceId
   }
 }
 
