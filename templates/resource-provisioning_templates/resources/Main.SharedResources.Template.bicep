@@ -12,6 +12,9 @@ param location string
 @sys.description('The name of the resource group the resources are deployed to.')
 param resourceGroupName string
 
+@sys.description('The name of the user-assigned managed identity.')
+param userAssignedIdentityName string
+
 module rg 'br/public:avm/res/resources/resource-group:0.2.3' = {
   name: '${resourceGroupName}Deploy'
   scope: subscription(subscriptionId)
@@ -126,3 +129,10 @@ module serviceBusNamespace 'br/public:avm/res/service-bus/namespace:0.9.0' = {
     zoneRedundant: false
   }
 }
+
+resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: userAssignedIdentityName
+  location: location
+}
+
+output userAssignedIdentityResourceId string = userAssignedIdentity.id

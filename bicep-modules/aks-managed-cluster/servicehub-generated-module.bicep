@@ -52,15 +52,26 @@ param kubernetesVersion string = ''
 @description('Optional. The default service mesh revision. Used when enableIstioServiceMesh is true.')
 param serviceMeshRevision string = 'asm-1-19'
 
+@sys.description('The name of the user-assigned managed identity.')
+param userAssignedIdentityName string = ''
+
 resource managedClusterShared 'Microsoft.ContainerService/managedClusters@2023-07-02-preview' existing = if (sharedResource) {
   name: name
+}
+
+resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: userAssignedIdentityName
+  location: location
 }
 
 resource managedCluster 'Microsoft.ContainerService/managedClusters@2023-07-02-preview' = if (!(sharedResource)) {
   name: name
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'SystemAssigned, UserAssigned'
+    userAssignedIdentities: {
+      '${userAssignedIdentity.id}': {}
+    }
   }
   properties: {
     dnsPrefix: dnsPrefix
@@ -151,3 +162,6 @@ output oidcIssuerUrl string = selectedManagedCluster.properties.oidcIssuerProfil
 
 @sys.description('The addonProfiles of the Kubernetes cluster.')
 output addonProfiles object = contains(selectedManagedCluster.properties, 'addonProfiles') ? selectedManagedCluster.properties.addonProfiles : {}
+
+@sys.description('The resource ID of the user-assigned managed identity.')
+output userAssignedIdentityResourceId string = userAssignedIdentity.id
